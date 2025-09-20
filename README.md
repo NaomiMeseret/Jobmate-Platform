@@ -1,4 +1,4 @@
-# 💼 JobMate - Smart Career Platform for African Youth
+# 💼 JobMate - AI-Powered Career Companion for Africa
 
 [![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
 [![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org)
@@ -17,14 +17,14 @@ JobMate is a comprehensive AI-powered career development platform designed to ad
 - Tackles Africa's youth unemployment crisis with AI-powered solutions
 - Provides personalized career guidance and skill development paths
 - Offers multilingual support (English & Amharic) for accessibility
-- Delivers seamless cross-platform experience (Web & Mobile)
+- Delivers seamless experience across web and mobile platforms
 
 ## 📱 Application Screenshots
 
 ### 🔐 Authentication Flow (Mobile App)
 
 | Welcome Screen | Sign Up | Login | Dashboard |
-| -------------- | ------- | ----- | --------- |
+| -------------- | -------------- | -------------- | --------- |
 | ![Welcome](docs/screenshots/welcome-screen.png) | ![Sign Up](docs/screenshots/sign-up.png) | ![Login](docs/screenshots/login.png) | ![Dashboard](docs/screenshots/dashboard.png) |
 
 ### 📄 CV Management Features (Mobile App)
@@ -42,7 +42,7 @@ JobMate is a comprehensive AI-powered career development platform designed to ad
 ### 🔍 Job Search & AI Features (Mobile App)
 
 | Job Search Interface |
-| -------------------- |
+| ------------ |
 | ![Job Search](docs/screenshots/job-search.png) |
 
 ### 🌐 Web Application
@@ -91,7 +91,7 @@ JobMate is a comprehensive AI-powered career development platform designed to ad
 ### **Frontend (Flutter & Next.js)**
 
 ```
-Mobile App (Flutter)          Web App (Next.js)
+Flutter Mobile App           Next.js Web App
 ├── features/                ├── app/
 │   ├── auth/               │   ├── login/
 │   ├── cv/                 │   ├── register/
@@ -119,80 +119,6 @@ backend/
 └── configs/                # Configuration files
 ```
 
-## 🛠️ Technical Implementation
-
-### **Frontend Architecture (Flutter)**
-
-```dart
-// Clean Architecture with BLoC State Management
-lib/
-├── core/                   # Shared utilities and constants
-├── features/              # Feature-based modules
-│   ├── auth/             # Authentication feature
-│   ├── cv_analysis/      # CV management feature
-│   ├── job_matching/     # Job discovery feature
-│   └── interview/        # Interview preparation
-└── shared/               # Shared widgets and services
-```
-
-**Key Technologies:**
-
-- **Flutter 3.7+** - Cross-platform mobile framework
-- **BLoC Pattern** - Predictable state management
-- **Material Design 3** - Modern adaptive UI components
-- **Dio** - HTTP client for API communication
-- **GetIt** - Dependency injection
-- **Go Router** - Declarative navigation
-
-### **Web Architecture (Next.js)**
-
-```typescript
-// Modern React with TypeScript
-src/
-├── pages/                 # Next.js pages and API routes
-├── components/           # Reusable UI components
-├── hooks/               # Custom React hooks
-├── services/            # API and business logic
-├── store/               # Redux state management
-└── utils/               # Utility functions
-```
-
-**Key Technologies:**
-
-- **Next.js 15.5** - React framework with SSR/SSG
-- **TypeScript** - Type-safe JavaScript
-- **Redux Toolkit** - Predictable state management
-- **Tailwind CSS** - Utility-first CSS framework
-- **Radix UI** - Accessible component primitives
-
-### **Backend Architecture (Go)**
-
-```go
-// Clean Architecture with Gin Framework
-internal/
-├── domain/              # Business entities and interfaces
-├── usecase/            # Business logic implementation
-├── delivery/           # HTTP handlers and middleware
-└── repository/         # Data persistence layer
-```
-
-**Key Technologies:**
-
-- **Go 1.21+** - High-performance backend language
-- **Gin** - HTTP web framework
-- **MongoDB** - Document-based NoSQL database
-- **Google Gemini** - AI/ML integration
-- **JWT** - Stateless authentication
-- **Docker** - Containerization
-
-### **Development Practices**
-
-- **Clean Architecture** - Domain-driven design principles
-- **SOLID Principles** - Maintainable and scalable code
-- **Test-Driven Development** - Comprehensive testing strategy
-- **CI/CD Pipeline** - Automated testing and deployment
-- **Code Documentation** - Comprehensive inline documentation
-- **Error Handling** - Robust exception management
 
 ## 🚀 Quick Start Guide
 
@@ -263,68 +189,6 @@ flutter run
 ```
 
 
-## 🔐 Security Features
-
-- **Password Hashing** with bcrypt and salt
-- **JWT Token Authentication** with expiration and refresh
-- **Input Validation** and sanitization across all endpoints
-- **Role-Based Access Control** (RBAC) for different user types
-- **Rate Limiting** to prevent API abuse
-- **CORS Configuration** for secure cross-origin requests
-- **Environment Variable Protection** for sensitive data
-- **SQL Injection Prevention** through parameterized queries
-- **XSS Protection** with content sanitization
-
-## 📊 Key Metrics & Analytics
-
-- **User Engagement**: CV uploads, job applications, interview sessions
-- **AI Performance**: CV analysis accuracy, job match relevance scores
-- **Career Outcomes**: Job placement rates, salary improvements
-- **Platform Usage**: Daily/monthly active users, feature adoption
-- **Geographic Distribution**: Usage across African countries
-- **Language Preferences**: English vs Amharic usage patterns
-
-
-## 📈 Performance Features
-
-- **Optimized State Management** with BLoC and Redux
-- **Lazy Loading** for large datasets and images
-- **Caching Strategy** for API responses and static content
-- **Database Indexing** for fast query performance
-- **CDN Integration** for global content delivery
-- **Image Optimization** with automatic compression
-- **Code Splitting** for faster web app loading
-- **Background Processing** for AI analysis tasks
-
-## 🤝 Contributing
-
-We welcome contributions from the community! Here's how you can help:
-
-### Development Workflow
-
-1. **Fork the repository**
-   ```bash
-   git clone https://github.com/your-organization/jobmate.git
-   cd jobmate
-   ```
-
-2. **Create a feature branch**
-   ```bash
-   git checkout -b feature/amazing-feature
-   ```
-
-3. **Follow coding standards**
-   - Use meaningful commit messages
-   - Write tests for new features
-   - Update documentation
-   - Follow language-specific style guides
-
-4. **Submit a pull request**
-   ```bash
-   git push origin feature/amazing-feature
-   # Create PR on GitHub
-   ```
-
 
 ## 💼 Professional Development Showcase
 
@@ -332,39 +196,20 @@ We welcome contributions from the community! Here's how you can help:
 
 - **Full-Stack Development**: Complete mobile, web, and backend implementation
 - **AI Integration**: Advanced AI capabilities using Google Gemini for career guidance
-- **Cross-Platform Development**: Flutter mobile app and Next.js web application
+- **Mobile & Web Development**: Flutter mobile app and Next.js web application
 - **Backend Architecture**: Go REST API with clean architecture principles
 - **Database Design**: MongoDB schemas optimized for career data
 - **State Management**: BLoC pattern for Flutter and Redux for web
 - **Multilingual Support**: English and Amharic language implementations
 - **Modern UI/UX**: Material Design 3 with responsive components
 
-### **🏗️ Software Engineering Best Practices**
-
-- **Clean Architecture**: Domain-driven design with clear separation of concerns
-- **SOLID Principles**: Maintainable, scalable, and testable code structure
-- **Comprehensive Testing**: Unit, integration, and end-to-end testing strategies
-- **Error Handling**: Robust exception management with user-friendly feedback
-- **Security Implementation**: JWT authentication, input validation, and data protection
-- **Documentation Excellence**: Complete setup guides, API docs, and user manuals
-- **Production Readiness**: Environment configuration, deployment guides, and monitoring
-- **Performance Optimization**: Caching, lazy loading, and efficient state management
-
-### **📊 Project Highlights**
-
-- **Real-World Impact**: Addresses genuine unemployment challenges in Africa
-- **AI-Powered Innovation**: Advanced CV analysis and career guidance using cutting-edge AI
-- **Cultural Sensitivity**: Multilingual support and Africa-focused design
-- **Scalable Architecture**: Built to handle growth and feature expansion
-- **Professional Quality**: Production-ready code with comprehensive testing
-- **User-Centric Design**: Intuitive interfaces designed for diverse user backgrounds
 
 ### **🎯 Key Achievements**
 
 - ✅ **AI-Powered CV Analysis**: Advanced document processing with actionable feedback
 - ✅ **Intelligent Job Matching**: Skill-based ranking with machine learning algorithms
 - ✅ **Multilingual Platform**: Native English and Amharic support with cultural context
-- ✅ **Cross-Platform Development**: Seamless Flutter mobile and Next.js web applications
+- ✅ **Multi-Platform Development**: Flutter mobile app and Next.js web application
 - ✅ **Scalable Backend**: Go-based REST API with clean architecture
 - ✅ **Real-World Impact**: Addresses Africa's youth unemployment crisis with innovative solutions
 
