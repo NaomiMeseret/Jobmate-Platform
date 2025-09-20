@@ -35,7 +35,7 @@ JobMate is a comprehensive AI-powered career development platform designed to ad
 
 ### 🎤 Interview Preparation Suite (Mobile App)
 
-| Free-form Interview | Free-form Interview Chat | Structured Interview | Interview Practice |
+| Free-form Interview | Free-form Interview Chat | Structured Interview |
 | ------------------- | -------------- | -------------------- | 
 | ![Free-form Interview](docs/screenshots/freeform-interview.png) | ![Free-form Interview Chat](docs/screenshots/freeform-interview-chat.png) | ![Structured Interview](docs/screenshots/structured-interview.png) |
 
