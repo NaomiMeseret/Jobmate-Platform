@@ -1,4 +1,4 @@
-# 🚀 JobMate - AI-Powered Career Companion for Africa
+# 💼 JobMate - Smart Career Platform for African Youth
 
 [![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
 [![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org)
