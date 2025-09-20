@@ -42,7 +42,7 @@ JobMate is a comprehensive AI-powered career development platform designed to ad
 ### 🔍 Job Search & AI Features (Mobile App)
 
 | Job Search Interface |
-| ----------- |
+| ------- |
 | ![Job Search](docs/screenshots/job-search.png) |
 
 ### 🌐 Web Application
