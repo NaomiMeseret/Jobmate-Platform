@@ -194,10 +194,10 @@ flutter run
 
 ### **🎯 Technical Skills Demonstrated**
 
-- **Full-Stack Development**: Complete mobile, web, and backend implementation
-- **AI Integration**: Advanced AI capabilities using Google Gemini for career guidance
-- **Mobile & Web Development**: Flutter mobile app and Next.js web application
-- **Backend Architecture**: Go REST API with clean architecture principles
+- **Mobile Development**: Flutter, Dart, BLoC, Material Design 3
+- **Web Development**: Next.js, React, TypeScript, Redux Toolkit, Tailwind CSS
+- **Backend Development**: Go, Gin, MongoDB, JWT Authentication, REST APIs
+- **AI/ML Integration**: Google Gemini API, natural language processing
 - **Database Design**: MongoDB schemas optimized for career data
 - **State Management**: BLoC pattern for Flutter and Redux for web
 - **Multilingual Support**: English and Amharic language implementations
@@ -212,17 +212,7 @@ flutter run
 - ✅ **Multi-Platform Development**: Flutter mobile app and Next.js web application
 - ✅ **Scalable Backend**: Go-based REST API with clean architecture
 - ✅ **Real-World Impact**: Addresses Africa's youth unemployment crisis with innovative solutions
-
-### **🎓 Technical Skills Demonstrated**
-
-- **Mobile Development**: Flutter, Dart, BLoC, Material Design 3
-- **Web Development**: Next.js, React, TypeScript, Redux Toolkit, Tailwind CSS
-- **Backend Development**: Go, Gin, MongoDB, JWT Authentication, REST APIs
-- **AI/ML Integration**: Google Gemini API, natural language processing
-- **Architecture**: Clean Architecture, SOLID principles, domain-driven design
-- **Security**: JWT authentication, input validation, secure data handling
-
-
+  
 ---
 
 <p align="center">
