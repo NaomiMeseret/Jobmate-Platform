@@ -45,11 +45,6 @@ JobMate is a comprehensive AI-powered career development platform designed to ad
 | ------------ |
 | ![Job Search](docs/screenshots/job-search.png) |
 
-### 🌐 Web Application
-**[🚀 Try Live Demo](https://jobmate.africa)** - Full-featured web interface with responsive design
-
-*The web application includes all mobile features plus enhanced desktop experience with advanced analytics and reporting capabilities.*
-
 ## ✨ **Key Features**
 
 ### 🤖 **AI-Powered Career Intelligence**
