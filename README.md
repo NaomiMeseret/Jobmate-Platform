@@ -9,6 +9,44 @@
 
 > **A comprehensive AI-powered career development platform specifically designed to address youth unemployment challenges in Africa. Built with cutting-edge AI technology and modern development practices.**
 
+## 👨‍💻 **My Contribution**
+
+I was responsible for implementing two critical backend features that form the foundation of the JobMate platform:
+
+### 🎤 **Interview Practice System**
+
+- **Designed and implemented** a comprehensive interview practice feature with dual modes:
+  - **Freeform Mode**: Conversational AI-powered interview coach allowing natural, open-ended practice sessions
+  - **Structured Mode**: Guided mock interviews with predefined question banks (general, technical, behavioral) and progress tracking
+- **AI Integration**: Integrated Groq LLM API with function-calling tools (`get_next_question`, `evaluate_answer`) to enable intelligent interview interactions
+- **Full CRUD Operations**: Built complete session management (create, read, update, complete) with MongoDB persistence
+- **Technical Implementation**:
+  - Implemented two-step AI flow: AI → tool calls → AI response for combining natural language with deterministic logic
+  - Created question bank system with session type categorization and progress tracking
+  - Built pagination support for chat history retrieval
+  - Designed MongoDB schema for interview sessions with embedded message arrays
+
+### 🔐 **Authentication & Security System**
+
+- **End-to-End Authentication**: Implemented complete authentication flow including registration, login, logout, and token refresh
+- **Email Verification**: Built OTP-based email verification system with:
+  - 6-digit code generation and secure bcrypt hashing
+  - SMTP email delivery with HTML-formatted verification emails
+  - Expiration and usage tracking to prevent replay attacks
+- **JWT Token Management**:
+  - Implemented access token (short-lived) and refresh token (long-lived) system
+  - Built token rotation mechanism with automatic revocation of old tokens
+  - Created HTTP-only cookie storage for refresh tokens
+- **OAuth2 Integration**: Implemented Google OAuth2 login with provider validation and account protection
+- **Security Features**:
+  - Password hashing with bcrypt and strength validation
+  - Auth middleware for JWT validation and user context injection
+  - Refresh token revocation on logout
+  - Provider matching to prevent account conflicts between OAuth and password-based users
+
+**Architecture**: Both features follow clean architecture principles with clear separation between delivery (controllers), use cases (business logic), domain (models/interfaces), and infrastructure (MongoDB, Groq, JWT, SMTP) layers.
+
+---
 ## 📋 **Project Overview**
 
 JobMate is a comprehensive AI-powered career development platform designed to address youth unemployment challenges across Africa. By leveraging Google Gemini AI, the platform provides personalized career guidance, CV optimization, intelligent job matching, and interview preparation to help young Africans bridge skill gaps and connect with global opportunities.
