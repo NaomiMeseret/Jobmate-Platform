@@ -5,28 +5,27 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
-	"regexp"
 	"strings"
 	"time"
 
 	"github.com/tsigemariamzewdu/JobMate-backend/delivery/dto"
 	"github.com/tsigemariamzewdu/JobMate-backend/domain/interfaces/repositories"
+	services "github.com/tsigemariamzewdu/JobMate-backend/domain/interfaces/services"
 	"github.com/tsigemariamzewdu/JobMate-backend/domain/models"
-	"github.com/tsigemariamzewdu/JobMate-backend/infrastructure/ai"
 	"github.com/tsigemariamzewdu/JobMate-backend/infrastructure/job_service"
 	"github.com/tsigemariamzewdu/JobMate-backend/repositories"
 )
 
 type JobAIService struct {
-	GroqClient  *ai.GroqClient
+	AIService   services.IAIService
 	JobService  *job_service.JobService
 	UserRepo    interfaces.IUserRepository
 	JobChatRepo *repositories.JobChatRepository
 }
 
-func NewJobAIService(groqClient *ai.GroqClient, jobService *job_service.JobService, userRepo interfaces.IUserRepository, jobChatRepo *repositories.JobChatRepository) *JobAIService {
+func NewJobAIService(aiService services.IAIService, jobService *job_service.JobService, userRepo interfaces.IUserRepository, jobChatRepo *repositories.JobChatRepository) *JobAIService {
 	return &JobAIService{
-		GroqClient:  groqClient,
+		AIService:   aiService,
 		JobService:  jobService,
 		UserRepo:    userRepo,
 		JobChatRepo: jobChatRepo,
@@ -53,22 +52,27 @@ func (s *JobAIService) HandleJobConversation(ctx context.Context, userID string,
 	messages := s.prepareAIMessages(userMessage, chatHistory, userProfile)
 
 	// Call AI
-	groqMessages := s.convertToGroqMessages(messages)
-	aiResponse, err := s.GroqClient.GetChatCompletion(ctx, groqMessages)
+	aiResponse, err := s.AIService.GetChatCompletion(ctx, messages, nil)
 	if err != nil {
 		log.Printf("AI call failed: %v", err)
-		return &models.JobAIResponse{
-			Message: "Sorry, I'm having trouble connecting to the AI service. Please try again later.",
-		}, nil
+		searchCriteria := s.extractFallbackCriteria(userMessage, userProfile)
+		return s.respondWithJobSearch(ctx, userID, chatID, userMessage, searchCriteria, "I could not reach Gemini, so I used a local career matching fallback for now."), nil
 	}
 
 	// Extract job search criteria from AI response
 	searchCriteria, aiTextResponse := s.extractJobSearchCriteriaAndResponse(aiResponse.Content, userProfile)
+	if searchCriteria == nil {
+		searchCriteria = s.extractFallbackCriteria(userMessage, userProfile)
+	}
+	return s.respondWithJobSearch(ctx, userID, chatID, userMessage, searchCriteria, aiTextResponse), nil
+}
 
+func (s *JobAIService) respondWithJobSearch(ctx context.Context, userID string, chatID string, userMessage string, searchCriteria *dto.JobSearchCriteriaDTO, aiTextResponse string) *models.JobAIResponse {
 	// If criteria is found and complete, perform job search
 	var jobs []models.Job
 	var searchMsg string
-	
+	var err error
+
 	if searchCriteria != nil && s.isCriteriaComplete(searchCriteria) {
 		jobs, searchMsg, err = s.JobService.GetCuratedJobs(
 			searchCriteria.Field,
@@ -90,38 +94,34 @@ func (s *JobAIService) HandleJobConversation(ctx context.Context, userID string,
 	// Save to chat history
 	response := s.saveChatHistory(ctx, userID, chatID, userMessage, finalResponse, searchCriteria, jobs)
 	response.Jobs = jobs
-	
-	return response, nil
+
+	return response
 }
 
 func (s *JobAIService) extractJobSearchCriteriaAndResponse(aiResponse string, userProfile *models.User) (*dto.JobSearchCriteriaDTO, string) {
-	// Look for JSON pattern in the AI response
-	re := regexp.MustCompile(`\{[^{}]*\"experience\"[^{}]*\"field\"[^{}]*\"language\"[^{}]*\"looking_for\"[^{}]*\"skills\"[^{}]*\}`)
-	matches := re.FindStringSubmatch(aiResponse)
-	
 	var criteria *dto.JobSearchCriteriaDTO
 	textResponse := aiResponse
 
-	if len(matches) > 0 {
+	jsonStr := extractJSONObject(aiResponse)
+	if jsonStr != "" {
 		// Extract JSON and remove it from the text response
-		jsonStr := matches[0]
 		textResponse = strings.Replace(aiResponse, jsonStr, "", 1)
 		textResponse = strings.TrimSpace(textResponse)
-		
+
 		var criteriaData dto.JobSearchCriteriaDTO
 		err := json.Unmarshal([]byte(jsonStr), &criteriaData)
 		if err != nil {
 			log.Printf("Failed to parse job search criteria: %v", err)
 		} else {
 			criteria = &criteriaData
-			
+
 			// Enhance with user profile data if available
 			if userProfile != nil {
 				if len(criteria.Skills) == 0 && len(userProfile.Skills) > 0 {
 					criteria.Skills = userProfile.Skills
 				}
-				
-				if criteria.Experience == "" && *userProfile.YearsExperience > 0 {
+
+				if criteria.Experience == "" && userProfile.YearsExperience != nil && *userProfile.YearsExperience > 0 {
 					if *userProfile.YearsExperience < 3 {
 						criteria.Experience = "entry-level"
 					} else if *userProfile.YearsExperience < 7 {
@@ -135,6 +135,66 @@ func (s *JobAIService) extractJobSearchCriteriaAndResponse(aiResponse string, us
 	}
 
 	return criteria, textResponse
+}
+
+func extractJSONObject(value string) string {
+	start := strings.Index(value, "{")
+	end := strings.LastIndex(value, "}")
+	if start == -1 || end == -1 || end <= start {
+		return ""
+	}
+	return strings.TrimSpace(value[start : end+1])
+}
+
+func (s *JobAIService) extractFallbackCriteria(userMessage string, userProfile *models.User) *dto.JobSearchCriteriaDTO {
+	lower := strings.ToLower(userMessage)
+	criteria := &dto.JobSearchCriteriaDTO{
+		Language:   "en",
+		LookingFor: "remote",
+		Experience: "entry-level",
+		Skills:     []string{},
+	}
+
+	if strings.Contains(lower, "amharic") || strings.Contains(lower, "አማርኛ") {
+		criteria.Language = "am"
+	}
+	if strings.Contains(lower, "local") || strings.Contains(lower, "ethiopia") || strings.Contains(lower, "addis") {
+		criteria.LookingFor = "local"
+	}
+	if strings.Contains(lower, "freelance") || strings.Contains(lower, "contract") {
+		criteria.LookingFor = "freelance"
+	}
+	if strings.Contains(lower, "senior") || strings.Contains(lower, "lead") {
+		criteria.Experience = "senior"
+	} else if strings.Contains(lower, "mid") || strings.Contains(lower, "3 years") || strings.Contains(lower, "4 years") || strings.Contains(lower, "5 years") {
+		criteria.Experience = "mid-level"
+	}
+
+	knownFields := []string{"software", "frontend", "backend", "data", "marketing", "sales", "design", "finance", "accounting", "project management", "product"}
+	for _, field := range knownFields {
+		if strings.Contains(lower, field) {
+			criteria.Field = field
+			break
+		}
+	}
+	if criteria.Field == "" && userProfile != nil && userProfile.CareerInterests != nil {
+		criteria.Field = *userProfile.CareerInterests
+	}
+	if criteria.Field == "" {
+		criteria.Field = strings.TrimSpace(userMessage)
+	}
+
+	knownSkills := []string{"react", "next.js", "typescript", "javascript", "python", "sql", "mongodb", "go", "figma", "excel", "communication"}
+	for _, skill := range knownSkills {
+		if strings.Contains(lower, skill) {
+			criteria.Skills = append(criteria.Skills, skill)
+		}
+	}
+	if len(criteria.Skills) == 0 && userProfile != nil && len(userProfile.Skills) > 0 {
+		criteria.Skills = userProfile.Skills
+	}
+
+	return criteria
 }
 
 func (s *JobAIService) isCriteriaComplete(criteria *dto.JobSearchCriteriaDTO) bool {
@@ -151,7 +211,7 @@ func (s *JobAIService) formatFinalResponse(aiTextResponse, searchMsg string, job
 	}
 
 	finalResponse := aiTextResponse
-	
+
 	if searchMsg != "" {
 		if finalResponse != "" {
 			finalResponse += "\n\n" + searchMsg
@@ -170,11 +230,12 @@ func (s *JobAIService) formatFinalResponse(aiTextResponse, searchMsg string, job
 	return finalResponse
 }
 
-func (s *JobAIService) prepareAIMessages(userMessage string, history []models.JobChatMessage, userProfile *models.User) []models.AIMessage {
-	messages := []models.AIMessage{
+func (s *JobAIService) prepareAIMessages(userMessage string, history []models.JobChatMessage, userProfile *models.User) []services.AIMessage {
+	messages := []services.AIMessage{
 		{
 			Role: "system",
-			Content: `You are a helpful job search assistant. Your task is to:
+			Content: `You are JobMate's Gemini-powered job matching assistant for Ethiopian job seekers.
+				Your task is to:
 
 				1. Extract job search criteria from user messages
 				2. Return a JSON object with the criteria
@@ -200,36 +261,25 @@ func (s *JobAIService) prepareAIMessages(userMessage string, history []models.Jo
 				User: "I have 5 years experience in marketing"
 				Response: "Thanks for sharing your experience! What type of marketing position are you looking for (local, remote, or freelance)?{\"experience\":\"mid-level\",\"field\":\"marketing\",\"language\":\"en\",\"looking_for\":\"\",\"skills\":[]}"
 
-				Always be helpful and guide the user to provide missing information.`,
+				Make the response warm, concise, and confidence-building. If the user writes Amharic, reply in Amharic.`,
 		},
 	}
 
 	// Add chat history
 	for _, msg := range history {
-		messages = append(messages, models.AIMessage{
+		messages = append(messages, services.AIMessage{
 			Role:    msg.Role,
 			Content: msg.Message,
 		})
 	}
 
 	// Add current user message
-	messages = append(messages, models.AIMessage{
+	messages = append(messages, services.AIMessage{
 		Role:    "user",
 		Content: userMessage,
 	})
 
 	return messages
-}
-
-func (s *JobAIService) convertToGroqMessages(messages []models.AIMessage) []dto.GroqAIMessageDTO {
-	var groqMessages []dto.GroqAIMessageDTO
-	for _, msg := range messages {
-		groqMessages = append(groqMessages, dto.GroqAIMessageDTO{
-			Role:    msg.Role,
-			Content: msg.Content,
-		})
-	}
-	return groqMessages
 }
 
 func (s *JobAIService) saveChatHistory(ctx context.Context, userID string, chatID string, userMessage string, aiResponse string, criteria *dto.JobSearchCriteriaDTO, jobs []models.Job) *models.JobAIResponse {
@@ -246,29 +296,30 @@ func (s *JobAIService) saveChatHistory(ctx context.Context, userID string, chatI
 	assistantMsg := models.JobChatMessage{
 		Role:      "assistant",
 		Message:   aiResponse,
+		Jobs:      jobs,
 		Timestamp: time.Now(),
 	}
 
 	var err error
+	query := map[string]any{
+		"field":       "",
+		"looking_for": "",
+		"skills":      []string{},
+		"experience":  "",
+		"language":    "en",
+	}
+
+	// Update query if criteria is available
+	if criteria != nil {
+		query["field"] = criteria.Field
+		query["looking_for"] = criteria.LookingFor
+		query["skills"] = criteria.Skills
+		query["experience"] = criteria.Experience
+		query["language"] = criteria.Language
+	}
+
 	if chatID == "" {
 		// Create new chat
-		query := map[string]any{
-			"field":       "",
-			"looking_for": "",
-			"skills":      []string{},
-			"experience":  "",
-			"language":    "en",
-		}
-
-		// Update query if criteria is available
-		if criteria != nil {
-			query["field"] = criteria.Field
-			query["looking_for"] = criteria.LookingFor
-			query["skills"] = criteria.Skills
-			query["experience"] = criteria.Experience
-			query["language"] = criteria.Language
-		}
-
 		chatID, err = s.JobChatRepo.CreateJobChat(ctx, userID, query, jobs, []models.JobChatMessage{userMsg, assistantMsg})
 		if err != nil {
 			log.Printf("Failed to create chat: %v", err)
@@ -284,6 +335,9 @@ func (s *JobAIService) saveChatHistory(ctx context.Context, userID string, chatI
 		err = s.JobChatRepo.AppendMessage(ctx, chatID, assistantMsg)
 		if err != nil {
 			log.Printf("Failed to append assistant message: %v", err)
+		}
+		if err = s.JobChatRepo.UpdateSearchResults(ctx, chatID, query, jobs); err != nil {
+			log.Printf("Failed to update job search results: %v", err)
 		}
 		response.ChatID = chatID
 	}
