@@ -1,9 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 import { useRegisterMutation } from "@/lib/redux/api/authApi";
 import { useLanguage } from "@/providers/language-provider";
-import toast from "react-hot-toast";
+import {
+  AuthCard,
+  AuthError,
+  AuthHeader,
+  PrimaryAuthButton,
+} from "./AuthShell";
 
 export default function OTPForm({
   firstName,
@@ -17,60 +24,48 @@ export default function OTPForm({
   password: string;
 }) {
   const { t } = useLanguage();
+  const router = useRouter();
   const [otp, setOtp] = useState("");
   const [error, setError] = useState("");
-
   const [registerUser, { isLoading }] = useRegisterMutation();
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
     try {
-      console.log({ email, password, otp });
-
-      await registerUser({ firstName,lastName, email, password, otp }).unwrap();
-      toast.success("Registered successfully! You can now login.");
-
-      window.location.href = "/login";
+      await registerUser({ firstName, lastName, email, password, otp }).unwrap();
+      toast.success("Registered successfully. You can now log in.");
+      router.push("/login");
     } catch {
       setError(t("otp_failed"));
     }
   };
 
   return (
-    <div className="bg-gray-50 w-full min-h-screen flex items-center justify-center">
-      <div className="w-full max-w-md p-8 rounded-xl bg-white shadow-lg">
-        <h2 className="text-2xl font-bold text-teal-600 text-center mb-2">
-          {t("otp_title")}
-        </h2>
-        <p className="text-gray-600 text-center mb-6 text-md">
-          {t("otp_subtitle1")} <span className="font-bold">{email}</span>{" "}
-          {t("otp_subtitle2")}
-        </p>
+    <AuthCard>
+      <AuthHeader
+        eyebrow="Verification"
+        title={t("otp_title")}
+        description={`${t("otp_subtitle1")} ${email}. ${t("otp_subtitle2")}`}
+      />
 
-        <form onSubmit={handleRegister} className="flex flex-col gap-5">
-          {error && <p className="text-red-500 text-sm text-center">{error}</p>}
-
-          <input
-            id="otp"
-            name="otp"
-            type="text"
-            placeholder={t("otp_placeholder")}
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-            required
-            className="p-3 border border-gray-300 rounded-md outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 text-center text-gray-700 text-lg"
-          />
-
-          <button
-            type="submit"
-            className="bg-teal-600 text-white py-3 rounded-md font-medium hover:bg-teal-700 transition"
-            disabled={isLoading}
-          >
-            {isLoading ? t("otp_verifying") : t("otp_button")}
-          </button>
-        </form>
-      </div>
-    </div>
+      <form onSubmit={handleRegister} className="space-y-4">
+        {error && <AuthError>{error}</AuthError>}
+        <input
+          name="otp"
+          type="text"
+          inputMode="numeric"
+          placeholder={t("otp_placeholder")}
+          value={otp}
+          onChange={(e) => setOtp(e.target.value)}
+          required
+          className="modern-input text-center text-xl font-black tracking-[0.4em]"
+        />
+        <PrimaryAuthButton disabled={isLoading}>
+          {isLoading ? t("otp_verifying") : t("otp_button")}
+        </PrimaryAuthButton>
+      </form>
+    </AuthCard>
   );
 }

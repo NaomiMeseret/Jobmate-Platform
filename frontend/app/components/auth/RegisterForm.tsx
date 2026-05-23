@@ -1,38 +1,44 @@
 "use client";
 
 import { useState } from "react";
-import OTPForm from "./OTPForm";
-import { User, Mail, Lock } from "lucide-react";
 import Link from "next/link";
+import { Lock, Mail, User } from "lucide-react";
 import { useRequestOtpMutation } from "@/lib/redux/api/authApi";
 import { useLanguage } from "@/providers/language-provider";
+import {
+  AuthCard,
+  AuthError,
+  AuthHeader,
+  PrimaryAuthButton,
+} from "./AuthShell";
+import OTPForm from "./OTPForm";
 
 export default function RegisterForm() {
-  const validatePassword = (pwd: string) => {
-    const errors: string[] = [];
-    if (pwd.length < 8) errors.push("8 characters");
-    if (!/[A-Z]/.test(pwd)) errors.push("1 uppercase letter");
-    if (!/[a-z]/.test(pwd)) errors.push("1 lowercase letter");
-    if (!/[0-9]/.test(pwd)) errors.push("1 number");
-    if (!/[!@#$%^&*]/.test(pwd)) errors.push("1 special character");
-    return errors;
-  };
-
-  const [passwordErrors, setPasswordErrors] = useState<string[]>([]);
   const { t } = useLanguage();
   const [step, setStep] = useState<"details" | "otp">("details");
-
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-
   const [requestOtp, { isLoading }] = useRequestOtpMutation();
+
+  const passwordErrors = [
+    password.length >= 8 ? "" : "8 characters",
+    /[A-Z]/.test(password) ? "" : "1 uppercase letter",
+    /[a-z]/.test(password) ? "" : "1 lowercase letter",
+    /[0-9]/.test(password) ? "" : "1 number",
+    /[!@#$%^&*]/.test(password) ? "" : "1 special character",
+  ].filter(Boolean);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+
+    if (passwordErrors.length) {
+      setError(`Password needs ${passwordErrors.join(", ")}.`);
+      return;
+    }
 
     try {
       await requestOtp({ email }).unwrap();
@@ -54,101 +60,99 @@ export default function RegisterForm() {
   }
 
   return (
-    <div className="w-full max-w-lg p-8 rounded-xl bg-white shadow-lg font-serif">
-      <h2 className="text-2xl font-bold text-teal-600 text-center">{t("r_join")}</h2>
-      <p className="text-gray-500 mb-6 text-center">{t("r_create")}</p>
+    <AuthCard>
+      <AuthHeader
+        eyebrow="Create account"
+        title={t("r_join")}
+        description={t("r_create")}
+      />
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-        {error && <p className="text-red-500 text-sm">{error}</p>}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {error && <AuthError>{error}</AuthError>}
 
-        {/* First Name */}
-        <div className="flex items-center gap-2 border rounded px-3 border-gray-300">
-          <User className="text-gray-500 w-5 h-5" />
-          <input
-            type="text"
-            id="firstName"
-            name="firstName"
-            placeholder={t("r_firstName")}
+        <div className="grid gap-4 sm:grid-cols-2">
+          <Field
+            icon={<User className="size-4" />}
+            label={t("r_firstName")}
             value={firstName}
-            onChange={(e) => setFirstName(e.target.value)}
-            required
-            className="flex-1 p-3 outline-none text-gray-700"
+            onChange={setFirstName}
+            name="firstName"
           />
-        </div>
-
-        {/* Last Name */}
-        <div className="flex items-center gap-2 border rounded px-3 border-gray-300">
-          <User className="text-gray-500 w-5 h-5" />
-          <input
-            type="text"
-            id="lastName"
-            name="lastName"
-            placeholder={t("r_lastName")}
+          <Field
+            icon={<User className="size-4" />}
+            label={t("r_lastName")}
             value={lastName}
-            onChange={(e) => setLastName(e.target.value)}
-            required
-            className="flex-1 p-3 outline-none text-gray-700"
+            onChange={setLastName}
+            name="lastName"
           />
         </div>
 
-        {/* Email */}
-        <div className="flex items-center gap-2 border rounded px-3 border-gray-300">
-          <Mail className="text-gray-500 w-5 h-5" />
-          <input
-            type="email"
-            id="email"
-            name="email"
-            placeholder={t("email")}
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            required
-            className="flex-1 p-3 outline-none text-gray-700"
-          />
-        </div>
+        <Field
+          icon={<Mail className="size-4" />}
+          label={t("email")}
+          value={email}
+          onChange={setEmail}
+          name="email"
+          type="email"
+        />
 
-        {/* Password */}
-        <div className="flex flex-col gap-1 w-full">
-          <div className="flex items-center gap-2 border rounded px-3 border-gray-300">
-            <Lock className="text-gray-500 w-5 h-5" />
-            <input
-              type="password"
-              id="password"
-              name="password"
-              placeholder={t("password")}
-              value={password}
-              onChange={(e) => {
-                setPassword(e.target.value);
-                setPasswordErrors(validatePassword(e.target.value));
-              }}
-              required
-              className="flex-1 p-3 outline-none text-gray-700"
-            />
-          </div>
+        <Field
+          icon={<Lock className="size-4" />}
+          label={t("password")}
+          value={password}
+          onChange={setPassword}
+          name="password"
+          type="password"
+        />
 
-          {password && passwordErrors.length > 0 && (
-            <p className="text-xs text-red-500 mt-1">
-              At least {passwordErrors.join(", ")}
-            </p>
-          )}
-        </div>
-
-        <button
-          type="submit"
-          className="bg-teal-600 text-white py-3 rounded-md font-medium hover:bg-teal-700 transition"
-          disabled={isLoading}
-        >
-          {isLoading ? "Signing up..." : t("r_createAccount")}
-        </button>
+        <PrimaryAuthButton disabled={isLoading}>
+          {isLoading ? "Sending OTP..." : t("r_createAccount")}
+        </PrimaryAuthButton>
       </form>
 
-      <div className="mt-4 text-center flex justify-center">
-        <p className="text-sm text-gray-500">
-          {t("r_noAccount")}{" "}
-          <Link className="text-teal-600 cursor-pointer hover:underline" href="/login">
-            {t("r_login")}
-          </Link>
-        </p>
-      </div>
-    </div>
+      <p className="mt-5 text-center text-sm text-[var(--text-muted)]">
+        {t("r_noAccount")}{" "}
+        <Link href="/login" className="font-medium text-[var(--accent-green)]">
+          {t("r_login")}
+        </Link>
+      </p>
+    </AuthCard>
+  );
+}
+
+function Field({
+  icon,
+  label,
+  value,
+  onChange,
+  name,
+  type = "text",
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  name: string;
+  type?: string;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-1.5 block text-sm font-medium text-[var(--text-primary)]">
+        {label}
+      </span>
+      <span className="relative block">
+        <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]">
+          {icon}
+        </span>
+        <input
+          type={type}
+          name={name}
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+          required
+          className="modern-input modern-input-with-icon"
+        />
+      </span>
+    </label>
   );
 }

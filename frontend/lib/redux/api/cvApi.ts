@@ -1,28 +1,12 @@
 
 
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { RootState } from "@/lib/redux/store";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { baseQueryWithReauth } from "./baseQuery";
 
 
  export const cvApi = createApi({
   reducerPath: "cvApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: "https://g6-jobmate-3.onrender.com",
-    prepareHeaders: (headers, { getState }) => {
-      const state = getState() as RootState;
-      console.log("Auth state in prepareHeaders:", state.auth);
-      //const token = (getState() as RootState).auth.accessToken;
-      const token = state.auth.user?.acces_token; // ✅ correct path
-      console.log("Token in prepareHeaders:", token);
-
-
-     //const token = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NTcyMjE0NzMsImlhdCI6MTc1NzIyMDU3MywibGFuZyI6ImVuIiwic3ViIjoiNjhiOWEwNmFmZjM2ZmZmM2E4MjBmZDIyIn0.37JA3tG6_hkrKuV1v4Z4vBU3tqnHJbKPprLbeDeCcnU"
-      if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
-      }
-      return headers;
-    },
-  }),
+  baseQuery: baseQueryWithReauth,
 
   endpoints: (builder) => ({
    uploadCV: builder.mutation({
@@ -37,7 +21,7 @@ import { RootState } from "@/lib/redux/store";
       formData.append("file", file);
 
       return {
-        url: "/cv",
+        url: "/cv/",
         method: "POST",
         body: formData,
       };
@@ -49,7 +33,7 @@ import { RootState } from "@/lib/redux/store";
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ rawText }),
+        body: { rawText },
       };
     } else {
       throw new Error("Either rawText or file must be provided");
@@ -73,7 +57,7 @@ import { RootState } from "@/lib/redux/store";
     }),
 
     sendMessage: builder.mutation<
-      { content: string; chat_id: string; timestamp: string },
+      { id?: string; role?: string; content: string; chat_id?: string; timestamp: string },
       { chat_id: string; message: string; cv_id?: string }
     >({
       query: ({ chat_id, ...body }) => ({

@@ -3,7 +3,6 @@ import {
   FileText,
   Briefcase,
   MessageCircle,
-  MessageSquare,
 } from "lucide-react";
 import { Button } from "./ui/Button";
 import { useLanguage } from "@/providers/language-provider";

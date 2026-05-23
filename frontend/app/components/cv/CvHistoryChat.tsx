@@ -15,11 +15,6 @@ interface Message {
   timestamp: string;
 }
 
-interface ChatHistoryResponse {
-  messages: Message[];
-  cv_id?: string;
-}
-
 export default function CvHistoryChat({ chatId }: { chatId: string }) {
   const { data, isLoading } = useGetChatHistoryQuery({ chat_id: chatId });
   const [sendMessage] = useSendMessageMutation();
@@ -71,7 +66,7 @@ export default function CvHistoryChat({ chatId }: { chatId: string }) {
         id: Date.now() + 1,
         role: "ai",
         content: res.content,
-        timestamp: res.data.timestamp,
+        timestamp: res.timestamp,
       };
 
       setMessages((prev) => [...prev, aiMsg]);
@@ -100,7 +95,7 @@ export default function CvHistoryChat({ chatId }: { chatId: string }) {
             message={{
               sender: msg.role === "user" ? "user" : "ai",
               text: msg.content,
-              time: formatTime(new Date(msg.timestamp),
+              time: formatTime(new Date(msg.timestamp)),
             }}
           />
         ))}

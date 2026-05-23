@@ -40,7 +40,11 @@ export default function JobChatWindow({
 }) {
   const { language, setLanguage, t } = useLanguage();
   const router = useRouter();
-  const hanldelBack = () => {
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+      return;
+    }
     router.push("/dashboard");
   };
 
@@ -51,7 +55,7 @@ export default function JobChatWindow({
         <div className="flex items-center gap-3">
           <ArrowLeft
             className="h-5 w-5 text-black cursor-pointer"
-            onClick={hanldelBack}
+            onClick={handleBack}
           />
           <div className="h-10 w-10 bg-[#00735B] text-white rounded-full flex items-center justify-center font-bold">
             JM

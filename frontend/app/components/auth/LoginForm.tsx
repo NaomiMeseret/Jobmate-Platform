@@ -1,52 +1,55 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Mail, Lock } from "lucide-react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useDispatch } from "react-redux";
+import { Lock, Mail } from "lucide-react";
+import toast from "react-hot-toast";
 import { useLoginMutation } from "@/lib/redux/api/authApi";
 import { setCredentials } from "@/lib/redux/authSlice";
-import { useDispatch } from "react-redux";
-import GoogleLoginButton from "./GoogleLoginBtn";
-import { useRouter, useSearchParams } from "next/navigation";
 import { useLanguage } from "@/providers/language-provider";
-import toast from "react-hot-toast";
 import ForgotPassword from "./ForgotPassword";
+import GoogleLoginButton from "./GoogleLoginBtn";
+import {
+  AuthCard,
+  AuthError,
+  AuthHeader,
+  PrimaryAuthButton,
+} from "./AuthShell";
 
 export default function LoginForm() {
   const { t } = useLanguage();
   const router = useRouter();
   const searchParams = useSearchParams();
   const dispatch = useDispatch();
-
   const redirect = searchParams.get("redirect") || "/dashboard";
-
-  const effectRan = useRef(false);
-
-  // Handle Google login callback
-  useEffect(() => {
-  if (effectRan.current) return;
-  effectRan.current = true;
-
-  const token = searchParams.get("token");
-  const userJson = searchParams.get("user");
-
-  if (token && userJson) {
-    const user = JSON.parse(userJson);
-    dispatch(setCredentials({ user, accessToken: token }));
-    localStorage.setItem("accessToken", token); // make sure it's in localStorage
-    toast.success("Logged in with Google!");
-    const redirect = searchParams.get("redirect") || "/dashboard";
-    router.replace(redirect); // cleanly redirect
-  }
-}, [searchParams, dispatch, router]);
-
+  const callbackHandled = useRef(false);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [showForgotPassword, setShowForgotPassword] = useState(false);
-
   const [login, { isLoading }] = useLoginMutation();
+
+  useEffect(() => {
+    if (callbackHandled.current) return;
+    callbackHandled.current = true;
+
+    const token = searchParams.get("token");
+    const userJson = searchParams.get("user");
+
+    if (token && userJson) {
+      try {
+        const user = JSON.parse(userJson);
+        dispatch(setCredentials({ user, accessToken: token }));
+        toast.success("Logged in with Google");
+        router.replace(redirect);
+      } catch {
+        setError("Unable to finish Google login. Please try again.");
+      }
+    }
+  }, [dispatch, redirect, router, searchParams]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,100 +60,100 @@ export default function LoginForm() {
       dispatch(
         setCredentials({
           user: data.user,
-          accessToken: data.user.acces_token ?? "",
+          accessToken: data.user.acces_token,
         })
       );
-      toast.success(" Logged in successfully!");
-      console.log(data.user)
-
+      toast.success("Logged in successfully");
       router.push(redirect);
-    } catch {
-      setError("Login failed. Please check your credentials.");
+    } catch (err: any) {
+      setError(
+        err?.data?.error ||
+          err?.data?.message ||
+          "Login failed. Please check your email and password."
+      );
     }
   };
 
   return (
-    <div className="w-full max-w-lg p-8 rounded-xl bg-white shadow-lg font-serif">
+    <AuthCard>
       {showForgotPassword ? (
         <ForgotPassword onClose={() => setShowForgotPassword(false)} />
       ) : (
         <>
-          <h2 className="text-2xl font-bold text-teal-600 text-center">
-            {t("l_welcome")}
-          </h2>
-          <p className="text-gray-500 mb-6 text-center">{t("l_subtitle")}</p>
+          <AuthHeader
+            eyebrow="Sign in"
+            title={t("l_welcome")}
+            description={t("l_subtitle")}
+          />
 
-          <form onSubmit={handleSubmit} className="flex flex-col gap-5">
-            {error && <p className="text-red-500 text-sm">{error}</p>}
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {error && <AuthError>{error}</AuthError>}
 
-            <div className="flex items-center gap-2 border rounded px-3 border-gray-300">
-              <Mail className="text-gray-500 w-5 h-5" />
-              <input
-                type="email"
-                id="loginEmail"
-                name="email"
-                placeholder={t("email")}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="flex-1 p-3 outline-none text-gray-800"
-              />
-            </div>
+            <label className="block">
+              <span className="mb-1.5 block text-sm font-medium text-[var(--text-primary)]">
+                {t("email")}
+              </span>
+              <span className="relative block">
+                <Mail className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--text-muted)]" />
+                <input
+                  type="email"
+                  name="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="modern-input modern-input-with-icon"
+                />
+              </span>
+            </label>
 
-            <div className="flex flex-col gap-1">
-              <div className="flex items-center gap-2 border rounded px-3 border-gray-300">
-                <Lock className="text-gray-500 w-5 h-5" />
+            <label className="block">
+              <span className="mb-1.5 block text-sm font-medium text-[var(--text-primary)]">
+                {t("password")}
+              </span>
+              <span className="relative block">
+                <Lock className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--text-muted)]" />
                 <input
                   type="password"
-                  id="loginPassword"
                   name="password"
-                  placeholder={t("password")}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="flex-1 p-3 outline-none text-gray-800"
+                  className="modern-input modern-input-with-icon"
                 />
-              </div>
-              <div className="text-right">
-                <p
-                  className="text-sm text-teal-600 hover:underline cursor-pointer"
-                  onClick={() => setShowForgotPassword(true)}
-                >
-                  {t("l_forgotPassword") || "Forgot Password?"}
-                </p>
-              </div>
-            </div>
+              </span>
+            </label>
 
             <button
-              type="submit"
-              className="bg-teal-600 text-white py-3 rounded-md font-medium hover:bg-teal-700 transition mt-2"
-              disabled={isLoading}
+              type="button"
+              onClick={() => setShowForgotPassword(true)}
+              className="text-sm font-medium text-[var(--accent-green)] hover:underline"
             >
-              {isLoading ? t("l_signingIn") : t("l_signIn")}
+              {t("l_forgotPassword") || "Forgot password?"}
             </button>
+
+            <PrimaryAuthButton disabled={isLoading}>
+              {isLoading ? t("l_signingIn") : t("l_signIn")}
+            </PrimaryAuthButton>
           </form>
 
-          <div className="flex items-center gap-2 my-2">
-            <hr className="flex-1 border-gray-200" />
-            <span className="text-gray-500 text-sm">OR</span>
-            <hr className="flex-1 border-gray-200" />
+          <div className="my-5 flex items-center gap-3">
+            <span className="h-px flex-1 bg-[var(--border)]" />
+            <span className="text-xs font-medium uppercase text-[var(--text-muted)]">
+              or
+            </span>
+            <span className="h-px flex-1 bg-[var(--border)]" />
           </div>
 
           <GoogleLoginButton />
 
-          <div className="mt-4 text-center flex justify-center">
-            <p className="text-sm text-gray-500">
-              {t("l_noAccount")}{" "}
-              <Link
-                className="text-teal-600 cursor-pointer hover:underline"
-                href="/register"
-              >
-                {t("l_register")}
-              </Link>
-            </p>
-          </div>
+          <p className="mt-5 text-center text-sm text-[var(--text-muted)]">
+            {t("l_noAccount")}{" "}
+            <Link href="/register" className="font-medium text-[var(--accent-green)]">
+              {t("l_register")}
+            </Link>
+          </p>
         </>
       )}
-    </div>
+    </AuthCard>
   );
 }

@@ -21,7 +21,7 @@ import { useLanguage } from "@/providers/language-provider";
 interface Message {
   id: number;
   sender: "user" | "ai";
-  text?: string | JSX.Element;
+  text?: React.ReactNode;
   time: string;
   type?: "cv-analysis";
   summary?: string;
@@ -36,7 +36,7 @@ interface SkillGap {
   currentLevel: number;
   recommendedLevel: number;
   importance: "important" | "optional";
-  improvementSuggestions: string[];
+  improvementSuggestions: string;
 }
 
 export default function CvChat() {
@@ -229,7 +229,7 @@ export default function CvChat() {
         time: formatTime(new Date(res.timestamp)),
       };
       setMessages((prev) => [...prev, aiMsg]);
-    } catch (err) {
+    } catch {
       setMessages((prev) => [
         ...prev,
         {

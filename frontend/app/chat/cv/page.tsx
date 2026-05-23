@@ -1,8 +1,5 @@
-import React from "react";
-import CvChat from "@/app/components/cv/cvChat";
+import { redirect } from "next/navigation";
 
-const cvPage = () => {
-  return <CvChat></CvChat>;
-};
-
-export default cvPage;
+export default function CvChatRoute() {
+  redirect("/cv");
+}
