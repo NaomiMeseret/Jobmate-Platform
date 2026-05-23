@@ -20,7 +20,7 @@ import (
 
 type AuthUsecase struct {
 	AuthRepo        repo.IAuthRepository
-	OTPRepo        repo.IOTPRepository      
+	OTPRepo         repo.IOTPRepository
 	PasswordService svc.IPasswordService
 	JWTService      svc.IJWTService
 	EmailService    svc.IEmailService
@@ -28,13 +28,13 @@ type AuthUsecase struct {
 	ContextTimeout  time.Duration
 }
 
-func NewAuthUsecase(repo repo.IAuthRepository, ps svc.IPasswordService, jw svc.IJWTService, bs string,OTPRepo repo.IOTPRepository , timeout time.Duration, emailService svc.IEmailService)uc.IAuthUsecase {
+func NewAuthUsecase(repo repo.IAuthRepository, ps svc.IPasswordService, jw svc.IJWTService, bs string, OTPRepo repo.IOTPRepository, timeout time.Duration, emailService svc.IEmailService) uc.IAuthUsecase {
 	return &AuthUsecase{
 		AuthRepo:        repo,
 		PasswordService: ps,
 		JWTService:      jw,
 		BaseURL:         bs,
-		OTPRepo: OTPRepo,
+		OTPRepo:         OTPRepo,
 		ContextTimeout:  timeout,
 		EmailService:    emailService,
 	}
@@ -57,7 +57,6 @@ func (uc *AuthUsecase) Register(ctx context.Context, input *models.User, oauthUs
 		}
 	}
 
-	
 	// check if email already exists
 	count, err := uc.AuthRepo.CountByEmail(ctx, *email)
 	if err != nil {
@@ -67,37 +66,34 @@ func (uc *AuthUsecase) Register(ctx context.Context, input *models.User, oauthUs
 		return nil, fmt.Errorf("%w", domain.ErrEmailAlreadyExists)
 	}
 
-	
-    // OTP verification (only for normal registration, not OAuth)
-if oauthUser == nil {
-    if input.OTP == nil {
-        return nil, fmt.Errorf("%w", errors.New("input otp is empty "))
-    }
+	// OTP verification (only for normal registration, not OAuth)
+	if oauthUser == nil {
+		if input.OTP == nil {
+			return nil, fmt.Errorf("%w", domain.ErrMissingOTP)
+		}
 
-    // fetch latest OTP for email - FIXED: Use GetLatestCodeByEmail instead of GetRecentRequestsByEmail
-    code, err := uc.OTPRepo.GetLatestCodeByEmail(ctx, *email)
-    if err != nil {
-        return nil, fmt.Errorf("%w: %v", domain.ErrDatabaseOperationFailed, err)
-    }
-    if code == nil {
-        return nil, fmt.Errorf("%w", errors.New("error getting the latest code by email"))
-    }
+		// fetch latest OTP for email - FIXED: Use GetLatestCodeByEmail instead of GetRecentRequestsByEmail
+		code, err := uc.OTPRepo.GetLatestCodeByEmail(ctx, *email)
+		if err != nil {
+			return nil, fmt.Errorf("%w: %v", domain.ErrDatabaseOperationFailed, err)
+		}
+		if code == nil {
+			return nil, fmt.Errorf("%w", domain.ErrMissingOTP)
+		}
 
-    if code.Used || time.Now().After(code.ExpiresAt) {
-        return nil, fmt.Errorf("%w", domain.ErrOTPExpired)
-    }
+		if code.Used || time.Now().After(code.ExpiresAt) {
+			return nil, fmt.Errorf("%w", domain.ErrOTPExpired)
+		}
 
-    if err := bcrypt.CompareHashAndPassword([]byte(code.CodeHash), []byte(*input.OTP)); err != nil {
-        return nil, fmt.Errorf("%w", domain.ErrInvalidOTP)
-    }
+		if err := bcrypt.CompareHashAndPassword([]byte(code.CodeHash), []byte(*input.OTP)); err != nil {
+			return nil, fmt.Errorf("%w", domain.ErrInvalidOTP)
+		}
 
-    // mark OTP as used - FIXED: Method name should be MarkCodeAsUsed
-    if err := uc.OTPRepo.MarkCodeAsUsed(ctx, code.ID); err != nil {
-        return nil, fmt.Errorf("%w: %v", domain.ErrOTPUseFailed, err)
-    }
-}
-
-	
+		// mark OTP as used - FIXED: Method name should be MarkCodeAsUsed
+		if err := uc.OTPRepo.MarkCodeAsUsed(ctx, code.ID); err != nil {
+			return nil, fmt.Errorf("%w: %v", domain.ErrOTPUseFailed, err)
+		}
+	}
 
 	var hashedPassword *string
 	if oauthUser == nil {
@@ -114,7 +110,7 @@ if oauthUser == nil {
 		LastName:  chooseNonEmpty(get(input, func(u *models.User) *string { return u.LastName }), get(oauthUser, func(u *models.User) *string { return u.LastName })),
 
 		Email:          email,
-		IsVerified: true,
+		IsVerified:     true,
 		Password:       hashedPassword,
 		ProfilePicture: oauthUserPicture(oauthUser),
 		Provider:       oauthUserProvider(oauthUser),
@@ -127,8 +123,6 @@ if oauthUser == nil {
 	if err != nil {
 		return nil, fmt.Errorf("%w: %v", domain.ErrUserCreationFailed, err)
 	}
-	
-
 
 	return &newUser, nil
 }
@@ -138,13 +132,13 @@ if oauthUser == nil {
 // Login handles user login usecase
 func (uc *AuthUsecase) Login(ctx context.Context, input *models.User) (*models.LoginResult, error) {
 
-	// find user by email 
+	// find user by email
 	var user *models.User
 	var err error
 
 	if validateEmail(*input.Email) {
 		user, err = uc.AuthRepo.FindByEmail(ctx, *input.Email)
-	} 
+	}
 
 	if err != nil {
 		return nil, fmt.Errorf("%w: %v", domain.ErrInvalidCredentials, err)
@@ -180,10 +174,6 @@ func (uc *AuthUsecase) Login(ctx context.Context, input *models.User) (*models.L
 	if err != nil {
 		return nil, fmt.Errorf("%w: %v", domain.ErrTokenGenerationFailed, err)
 	}
-
-	
-
-	
 
 	// update the user (save the tokens into database)
 	err = uc.AuthRepo.SaveRefreshToken(ctx, user.UserID, refreshToken)
@@ -223,7 +213,6 @@ func (uc *AuthUsecase) OAuthLogin(ctx context.Context, oauthUser *models.User) (
 		}
 	}
 
-
 	// generate access token (handle nil PreferredLanguage)
 	lang := "en"
 	if user.PreferredLanguage != nil {
@@ -245,8 +234,6 @@ func (uc *AuthUsecase) OAuthLogin(ctx context.Context, oauthUser *models.User) (
 	if err := uc.AuthRepo.SaveRefreshToken(ctx, user.UserID, refreshToken); err != nil {
 		return nil, fmt.Errorf("%w: %v", domain.ErrDatabaseOperationFailed, err)
 	}
-
-	
 
 	return &models.LoginResult{
 		AccessToken:  accessToken,
@@ -289,7 +276,7 @@ func oauthUserProvider(oauthUser *models.User) string {
 }
 
 // Logout invalidates a user's refresh token so they cannot refresh their session.
-func (uc *AuthUsecase) Logout(ctx context.Context, userID string,token string) error {
+func (uc *AuthUsecase) Logout(ctx context.Context, userID string, token string) error {
 	if userID == "" {
 		return domain.ErrInvalidInput
 	}
@@ -303,63 +290,61 @@ func (uc *AuthUsecase) Logout(ctx context.Context, userID string,token string) e
 	return nil
 }
 
-
 func (uc *AuthUsecase) RefreshToken(ctx context.Context, incomingToken string) (*string, time.Duration, error) {
-    emptyToken := ""
+	emptyToken := ""
 
-    if incomingToken == "" {
-        return &emptyToken, 0, fmt.Errorf("%w", domain.ErrInvalidInput)
-    }
+	if incomingToken == "" {
+		return &emptyToken, 0, fmt.Errorf("%w", domain.ErrInvalidInput)
+	}
 
-    // Find the refresh token in DB
-    storedToken, err := uc.AuthRepo.FindRefreshToken(ctx, incomingToken)
-    if err != nil {
-        return &emptyToken, 0, domain.ErrTokenVerificationFailed
-    }
+	// Find the refresh token in DB
+	storedToken, err := uc.AuthRepo.FindRefreshToken(ctx, incomingToken)
+	if err != nil {
+		return &emptyToken, 0, domain.ErrTokenVerificationFailed
+	}
 
-    // Check if revoked or expired
-    if storedToken.IsRevoked || storedToken.ExpiresAt.Before(time.Now()) {
-        return &emptyToken, 0, domain.ErrTokenVerificationFailed
-    }
+	// Check if revoked or expired
+	if storedToken.IsRevoked || storedToken.ExpiresAt.Before(time.Now()) {
+		return &emptyToken, 0, domain.ErrTokenVerificationFailed
+	}
 
-    // Fetch user
+	// Fetch user
 	user, err := uc.AuthRepo.FindByID(ctx, storedToken.UserID)
-    if err != nil {
-        return &emptyToken, 0, domain.ErrDatabaseOperationFailed
-    }
+	if err != nil {
+		return &emptyToken, 0, domain.ErrDatabaseOperationFailed
+	}
 
-    lang := "en"
-    if user.PreferredLanguage != nil {
-        lang = string(*user.PreferredLanguage)
-    }
+	lang := "en"
+	if user.PreferredLanguage != nil {
+		lang = string(*user.PreferredLanguage)
+	}
 
-    // Generate new access token
-    newAccessToken, expiryTime, err := uc.JWTService.GenerateAccessToken(user.UserID, lang)
-    if err != nil {
-        return &emptyToken, 0, domain.ErrTokenGenerationFailed
-    }
+	// Generate new access token
+	newAccessToken, expiryTime, err := uc.JWTService.GenerateAccessToken(user.UserID, lang)
+	if err != nil {
+		return &emptyToken, 0, domain.ErrTokenGenerationFailed
+	}
 
-    // Optionally, rotate refresh token
-    newRefreshToken, err := uc.JWTService.GenerateRefreshToken(user.UserID)
-    if err != nil {
-        return &emptyToken, 0, domain.ErrTokenGenerationFailed
-    }
+	// Optionally, rotate refresh token
+	newRefreshToken, err := uc.JWTService.GenerateRefreshToken(user.UserID)
+	if err != nil {
+		return &emptyToken, 0, domain.ErrTokenGenerationFailed
+	}
 
-    // Save the new refresh token and revoke the old one
-    err = uc.AuthRepo.SaveRefreshToken(ctx, user.UserID, newRefreshToken)
-    if err != nil {
-        return &emptyToken, 0, domain.ErrDatabaseOperationFailed
-    }
+	// Save the new refresh token and revoke the old one
+	err = uc.AuthRepo.SaveRefreshToken(ctx, user.UserID, newRefreshToken)
+	if err != nil {
+		return &emptyToken, 0, domain.ErrDatabaseOperationFailed
+	}
 
-    // Revoke the old refresh token
-    err = uc.AuthRepo.FindAndInvalidate(ctx, user.UserID, incomingToken)
-    if err != nil {
-        return &emptyToken, 0, domain.ErrDatabaseOperationFailed
-    }
+	// Revoke the old refresh token
+	err = uc.AuthRepo.FindAndInvalidate(ctx, user.UserID, incomingToken)
+	if err != nil {
+		return &emptyToken, 0, domain.ErrDatabaseOperationFailed
+	}
 
-    return &newAccessToken, expiryTime, nil
+	return &newAccessToken, expiryTime, nil
 }
-
 
 // function to validate password strength
 
@@ -382,6 +367,7 @@ func validatePasswordStrength(password string) bool {
 
 	return hasLetter && hasNumber
 }
+
 // ResetPassword resets user password after OTP verification
 func (uc *AuthUsecase) ResetPassword(ctx context.Context, email, otp, newPassword string) error {
 	// Get latest password reset OTP (same pattern as registration)

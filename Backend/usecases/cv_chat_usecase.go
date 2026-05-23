@@ -164,7 +164,6 @@ func (u *cvChatUsecase) SendMessage(ctx context.Context, userID string, message 
 	return &aiMessage, nil
 }
 
-
 func (u *cvChatUsecase) CreateCVChatSession(ctx context.Context, userID string, cvID string) (string, error) {
 	return u.CVChatRepository.CreateCVChat(ctx, userID, cvID)
 }
@@ -279,7 +278,7 @@ func (u *cvChatUsecase) getExistingCVAnalysis(ctx context.Context, cvID string) 
 		sb.WriteString("  No significant skill gaps identified.\n")
 	} else {
 		for i, gap := range skillGaps {
-			sb.WriteString(fmt.Sprintf("  %d. %s (Current: %s, Recommended: %s, Importance: %s)\n",
+			sb.WriteString(fmt.Sprintf("  %d. %s (Current: %d, Recommended: %d, Importance: %s)\n",
 				i+1, gap.SkillName, gap.CurrentLevel, gap.RecommendedLevel, gap.Importance))
 			sb.WriteString(fmt.Sprintf("     Suggestion: %s\n", gap.ImprovementSuggestions))
 		}
@@ -400,35 +399,50 @@ func (u *cvChatUsecase) handleCVToolCalls(ctx context.Context, chatID string, to
 
 	finalResponse, err := u.AIService.GetChatCompletion(ctx, finalMessages, nil)
 	if err != nil {
+		combined := make([]string, 0, len(toolResponses))
+		for _, msg := range toolResponses {
+			if strings.TrimSpace(msg.Content) != "" {
+				combined = append(combined, msg.Content)
+			}
+		}
+		if len(combined) > 0 {
+			return u.saveAssistantMessage(ctx, chatID, strings.Join(combined, "\n\n"))
+		}
 		return u.createFallbackResponse(ctx, chatID, err)
+	}
+	content := strings.TrimSpace(finalResponse.Content)
+	if content == "" {
+		combined := make([]string, 0, len(toolResponses))
+		for _, msg := range toolResponses {
+			if strings.TrimSpace(msg.Content) != "" {
+				combined = append(combined, msg.Content)
+			}
+		}
+		content = strings.Join(combined, "\n\n")
 	}
 
 	// Save final AI response
-	aiMessage := model.CVChatMessage{
-		Role:      "assistant",
-		Content:   strings.TrimSpace(finalResponse.Content),
-		Timestamp: time.Now(),
-	}
-
-	err = u.CVChatRepository.AppendMessage(ctx, chatID, aiMessage)
-	if err != nil {
-		return nil, fmt.Errorf("failed to save AI response: %w", err)
-	}
-
-	return &aiMessage, nil
+	return u.saveAssistantMessage(ctx, chatID, content)
 }
 
 func (u *cvChatUsecase) createFallbackResponse(ctx context.Context, chatID string, aiErr error) (*model.CVChatMessage, error) {
-	fallbackMessage := "I'm experiencing technical difficulties. Please try again in a moment."
+	fallbackMessage := "Gemini is not available right now, but I can still help: upload or analyze your CV first, then ask about strengths, weaknesses, missing skills, or how to tailor it for a target role."
+	return u.saveAssistantMessage(ctx, chatID, fallbackMessage)
+}
 
+func (u *cvChatUsecase) saveAssistantMessage(ctx context.Context, chatID string, content string) (*model.CVChatMessage, error) {
 	aiMessage := model.CVChatMessage{
 		Role:      "assistant",
-		Content:   fallbackMessage,
+		Content:   strings.TrimSpace(content),
 		Timestamp: time.Now(),
 	}
 
-	// Try to save fallback message
-	_ = u.CVChatRepository.AppendMessage(ctx, chatID, aiMessage)
+	if aiMessage.Content == "" {
+		aiMessage.Content = "I could not generate a response yet. Please try again with a more specific CV question."
+	}
 
+	if err := u.CVChatRepository.AppendMessage(ctx, chatID, aiMessage); err != nil {
+		return nil, fmt.Errorf("failed to save AI response: %w", err)
+	}
 	return &aiMessage, nil
 }

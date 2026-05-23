@@ -1,6 +1,4 @@
 "use client";
-import { SkillGap } from "@/lib/types/chat";
-
 import {
   CheckCircle,
   ThumbsUp,
@@ -18,10 +16,10 @@ type SkillGap = {
 };
 
 type CVMessageProps = {
-  summary: string;
-  strengths: string;
-  weaknesses: string;
-  improvements: string;
+  summary?: string;
+  strengths?: string;
+  weaknesses?: string;
+  improvements?: string;
   skillGaps?: SkillGap[] | null;
 };
 
@@ -44,7 +42,7 @@ export default function CVMessage({
         {/* Header */}
         <h2 className="text-lg font-bold text-gray-800 flex items-center gap-2">
           <CheckCircle className="text-green-600 w-5 h-5" />
-          CV Analysis Complete
+          {summary || "CV Analysis Complete"}
           <span className="text-sm text-gray-500 ml-auto">AI Analysis</span>
         </h2>
 

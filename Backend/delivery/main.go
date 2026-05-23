@@ -18,6 +18,7 @@ import (
 	mongoclient "github.com/tsigemariamzewdu/JobMate-backend/infrastructure/db/mongo"
 	// utils "github.com/tsigemariamzewdu/JobMate-backend/infrastructure/util"
 	file_parser "github.com/tsigemariamzewdu/JobMate-backend/infrastructure/file_parser"
+	paymentinfra "github.com/tsigemariamzewdu/JobMate-backend/infrastructure/payment"
 	"github.com/tsigemariamzewdu/JobMate-backend/repositories"
 	"github.com/tsigemariamzewdu/JobMate-backend/usecases"
 )
@@ -49,6 +50,7 @@ func main() {
 	interviewFreeformRepo := repositories.NewInterviewFreeformRepository(db)
 	interviewStructuredRepo := repositories.NewInterviewStructuredRepository(db)
 	jobChatRepo := repositories.NewJobChatRepository(db)
+	paymentRepo := repositories.NewPaymentRepository(db)
 	// use the name conversationRepo because feature branch used it
 	//conversationRepo := repositories.NewConversationRepository(db)
 
@@ -60,6 +62,7 @@ func main() {
 	// Initialize services
 	phoneValidator := &authinfra.PhoneValidatorImpl{}
 	emailService := emailinfra.NewSMTPService(cfg.SMTPHost, cfg.SMTPPort, cfg.SMTPUsername, cfg.SMTPPassword, cfg.EmailFrom)
+	chapaClient := paymentinfra.NewChapaClient(cfg.ChapaSecretKey, cfg.ChapaBaseURL)
 
 	otpSender, err := authinfra.NewOTPSenderFromEnv(cfg)
 	if err != nil {
@@ -71,7 +74,6 @@ func main() {
 	authMiddleware := authinfra.NewAuthMiddleware(jwtService)
 	oauthService, err := authinfra.NewOAuth2Service(providersConfigs)
 	aiService := ai_service.NewGeminiAISuggestionService(cfg.GeminiModelName, cfg.GeminiApiKey)
-	jobAIService := ai_service.NewJobAIService(groqpkg.NewGroqClient(cfg), job_service.NewJobService(cfg.JobDataApiKey), userRepo, jobChatRepo)
 
 	textExtractor := file_parser.NewFileTextExtractor()
 
@@ -79,13 +81,12 @@ func main() {
 		log.Fatalf("Failed to initialize OAuth2 service: %v", err)
 	}
 
-
 	// Initialize AI client (avoid alias/variable collision)
-	geminiClient:=groqpkg.NewGeminiService(cfg)
-
+	geminiClient := groqpkg.NewGeminiService(cfg)
 	groqClient := groqpkg.NewGroqClient(cfg)
-	// groqService:=groqpkg.NewGroqServiceAdapter(groqClient)
-	
+	groqService := groqpkg.NewGroqServiceAdapter(groqClient)
+	chatAIService := groqpkg.NewProviderFallbackService(geminiClient, groqService, "Gemini", "Groq")
+	jobAIService := ai_service.NewJobAIService(chatAIService, job_service.NewJobService(cfg.JobDataApiKey), userRepo, jobChatRepo)
 
 	// Initialize use cases
 	otpUsecase := usecases.NewOTPUsecase(otpRepo, phoneValidator, otpSenderTyped, emailService)
@@ -94,19 +95,17 @@ func main() {
 	cvUsecase := usecases.NewCVUsecase(cvRepo, feedbackRepo, skillGapRepo, aiService, textExtractor, time.Second*15)
 	//chatUsecase := usecases.NewChatUsecase(conversationRepo, groqClient, cfg)
 
-
 	// Initialize AI service adapter for interview and CV chat usecases
-	
-	cvChatUsecase := usecases.NewCVChatUsecase(cvChatRepo, cvUsecase,cvRepo,feedbackRepo,skillGapRepo, geminiClient)
 
+	cvChatUsecase := usecases.NewCVChatUsecase(cvChatRepo, cvUsecase, cvRepo, feedbackRepo, skillGapRepo, chatAIService)
 
-	interviewFreeformUsecase := usecases.NewInterviewFreeformUsecase(interviewFreeformRepo, geminiClient)
-	interviewStructuredUsecase := usecases.NewInterviewStructuredUsecase(interviewStructuredRepo, authRepo, geminiClient)
-
+	interviewFreeformUsecase := usecases.NewInterviewFreeformUsecase(interviewFreeformRepo, chatAIService)
+	interviewStructuredUsecase := usecases.NewInterviewStructuredUsecase(interviewStructuredRepo, authRepo, chatAIService)
 
 	// Job Matching feature
 	jobRepo := job_service.NewJobService(cfg.JobDataApiKey)
 	jobUsecase := usecases.NewJobUsecase(jobRepo, jobChatRepo, jobAIService)
+	paymentUsecase := usecases.NewPaymentUsecase(paymentRepo, authRepo, chapaClient, cfg.FrontendURL, cfg.BackendURL)
 
 	// Initialize controllers
 	otpController := controllers.NewOtpController(otpUsecase)
@@ -119,6 +118,7 @@ func main() {
 	interviewFreeformController := controllers.NewInterviewFreeformController(interviewFreeformUsecase)
 	interviewStructuredController := controllers.NewInterviewStructuredController(interviewStructuredUsecase)
 	jobController := controllers.NewJobController(jobUsecase, jobChatRepo, groqClient, jobAIService)
+	paymentController := controllers.NewPaymentController(paymentUsecase)
 
 	// Setup router (add all controllers)
 	router := routes.SetupRouter(
@@ -132,6 +132,7 @@ func main() {
 		interviewFreeformController,
 		interviewStructuredController,
 		jobController,
+		paymentController,
 	)
 
 	port := cfg.Port

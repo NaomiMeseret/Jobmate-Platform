@@ -1,17 +1,22 @@
 import type React from "react";
-import { GeistSans } from "geist/font/sans";
-import { Noto_Sans_Ethiopic } from "next/font/google";
-import { LanguageProvider } from "@/providers/language-provider";
-import ReduxProvider from "../providers/ReduxProvider";
+import { Cormorant_Garamond, DM_Sans } from "next/font/google";
 import type { Metadata } from "next";
 import "./globals.css";
-import ProtectedWrapper from "./components/ProtectedWrapper";
-import { Toaster } from "react-hot-toast";
+import AppProviders from "./components/AppProviders";
+import Background from "./components/Background";
 
-const notoSansEthiopic = Noto_Sans_Ethiopic({
-  subsets: ["ethiopic"],
+const display = Cormorant_Garamond({
+  subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
+  variable: "--font-display",
   display: "swap",
-  variable: "--font-ethiopic",
+});
+
+const body = DM_Sans({
+  subsets: ["latin"],
+  weight: ["300", "400", "500"],
+  variable: "--font-body",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -29,24 +34,12 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${GeistSans.variable} ${notoSansEthiopic.variable}`}
+      className={`${display.variable} ${body.variable}`}
+      suppressHydrationWarning
     >
-      <head>
-        <style>{`
-html {
-  font-family: ${GeistSans.style.fontFamily};
-  --font-sans: ${GeistSans.variable};
-  --font-ethiopic: ${notoSansEthiopic.variable};
-}
-        `}</style>
-      </head>
-      <body>
-        <ReduxProvider>
-          <LanguageProvider>
-            <ProtectedWrapper>{children}</ProtectedWrapper>
-            <Toaster position="top-right" reverseOrder={false} />
-          </LanguageProvider>
-        </ReduxProvider>
+      <body suppressHydrationWarning>
+        <Background />
+        <AppProviders>{children}</AppProviders>
       </body>
     </html>
   );

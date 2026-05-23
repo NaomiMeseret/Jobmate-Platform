@@ -12,7 +12,6 @@ import (
 	"github.com/tsigemariamzewdu/JobMate-backend/domain/models"
 )
 
-
 var freeformChatTools = []services.AITool{
 	{
 		Type: "function",
@@ -254,7 +253,7 @@ func (u *InterviewFreeformUsecase) handleInterviewToolCalls(ctx context.Context,
 			if requestedSessionType == "" {
 				requestedSessionType = sessionType
 			}
-			
+
 			question := u.generateSessionQuestion(requestedSessionType, messages, currentQuestion)
 			toolOutput = fmt.Sprintf("Here's your next %s interview question: %s", requestedSessionType, question)
 
@@ -285,7 +284,7 @@ func (u *InterviewFreeformUsecase) handleInterviewToolCalls(ctx context.Context,
 			if context == "" {
 				context = sessionType
 			}
-			
+
 			advice := u.provideContextualAdvice(topic, context)
 			toolOutput = advice
 
@@ -310,23 +309,30 @@ func (u *InterviewFreeformUsecase) handleInterviewToolCalls(ctx context.Context,
 
 	finalResponse, err := u.AIService.GetChatCompletion(ctx, finalMessages, nil)
 	if err != nil {
+		combined := make([]string, 0, len(toolResponses))
+		for _, msg := range toolResponses {
+			if strings.TrimSpace(msg.Content) != "" {
+				combined = append(combined, msg.Content)
+			}
+		}
+		if len(combined) > 0 {
+			return u.saveAssistantMessage(ctx, chatID, strings.Join(combined, "\n\n"))
+		}
 		return u.createFallbackResponse(ctx, chatID, err)
+	}
+	content := strings.TrimSpace(finalResponse.Content)
+	if content == "" {
+		combined := make([]string, 0, len(toolResponses))
+		for _, msg := range toolResponses {
+			if strings.TrimSpace(msg.Content) != "" {
+				combined = append(combined, msg.Content)
+			}
+		}
+		content = strings.Join(combined, "\n\n")
 	}
 
 	// Save final AI response
-	aiMessage := models.InterviewFreeformMessage{
-		Role:    "assistant",
-		Content: strings.TrimSpace(finalResponse.Content),
-		// QuestionIndex not needed for freeform messages
-		Timestamp: time.Now(),
-	}
-
-	savedMessage, err := u.InterviewFreeformRepository.AppendMessage(ctx, chatID, aiMessage)
-	if err != nil {
-		return nil, fmt.Errorf("failed to save AI response: %w", err)
-	}
-
-	return savedMessage, nil
+	return u.saveAssistantMessage(ctx, chatID, content)
 }
 
 func (u *InterviewFreeformUsecase) evaluateAnswer(answer, question, sessionType string) string {
@@ -362,7 +368,7 @@ func (u *InterviewFreeformUsecase) generateSessionQuestion(sessionType string, m
 		"Why should we hire you?",
 		"What motivates you in your work?",
 	}
-	
+
 	technicalQuestions := []string{
 		"Describe your experience with your primary programming language.",
 		"How do you approach debugging a complex technical issue?",
@@ -372,7 +378,7 @@ func (u *InterviewFreeformUsecase) generateSessionQuestion(sessionType string, m
 		"How do you ensure code quality in your projects?",
 		"Describe your experience with version control and collaboration.",
 	}
-	
+
 	behavioralQuestions := []string{
 		"Tell me about a time you had to deal with a difficult colleague.",
 		"Describe a situation where you had to meet a tight deadline.",
@@ -382,7 +388,7 @@ func (u *InterviewFreeformUsecase) generateSessionQuestion(sessionType string, m
 		"How do you prioritize tasks when everything seems urgent?",
 		"Tell me about a time you went above and beyond your job requirements.",
 	}
-	
+
 	var questions []string
 	switch sessionType {
 	case "technical":
@@ -392,7 +398,7 @@ func (u *InterviewFreeformUsecase) generateSessionQuestion(sessionType string, m
 	default:
 		questions = generalQuestions
 	}
-	
+
 	questionIndex := currentQuestion % len(questions)
 	return questions[questionIndex]
 }
@@ -407,7 +413,7 @@ func (u *InterviewFreeformUsecase) provideContextualAdvice(topic string, session
 	default:
 		contextPrefix = "For general interviews: "
 	}
-	
+
 	switch strings.ToLower(topic) {
 	case "strengths":
 		if sessionContext == "technical" {
@@ -416,36 +422,43 @@ func (u *InterviewFreeformUsecase) provideContextualAdvice(topic string, session
 			return contextPrefix + "Emphasize soft skills like leadership, teamwork, communication. Use the STAR method to structure your examples."
 		}
 		return contextPrefix + "Choose 2-3 key strengths relevant to the role. Always back them up with specific examples and explain how they benefit the employer."
-		
+
 	case "weaknesses":
 		return contextPrefix + "Choose a real weakness that won't disqualify you. Show self-awareness and demonstrate concrete steps you're taking to improve. Always end with progress made."
-		
+
 	case "star method":
 		return "STAR Method: Situation (context), Task (what needed to be done), Action (what you did), Result (outcome). Use this for all behavioral questions to provide structured, complete answers."
-		
+
 	case "preparation":
 		if sessionContext == "technical" {
 			return contextPrefix + "Review coding fundamentals, practice problem-solving, prepare to explain your projects in detail, and be ready for technical challenges or whiteboarding."
 		}
 		return contextPrefix + "Research the company, prepare STAR stories, practice common questions, prepare thoughtful questions to ask, and review your resume thoroughly."
-		
+
 	default:
 		return fmt.Sprintf("%sI can help with specific interview topics like strengths, weaknesses, STAR method, preparation tips, and more. What would you like to know about?", contextPrefix)
 	}
 }
 
 func (u *InterviewFreeformUsecase) createFallbackResponse(ctx context.Context, chatID string, aiErr error) (*models.InterviewFreeformMessage, error) {
-	fallbackMessage := "I'm experiencing technical difficulties. Let's continue with the next question when ready."
+	fallbackMessage := "Gemini is not available right now, so I switched to local practice mode. Ask for a technical, behavioral, or general interview question and I will keep the session moving."
+	return u.saveAssistantMessage(ctx, chatID, fallbackMessage)
+}
 
+func (u *InterviewFreeformUsecase) saveAssistantMessage(ctx context.Context, chatID string, content string) (*models.InterviewFreeformMessage, error) {
 	aiMessage := models.InterviewFreeformMessage{
 		Role:      "assistant",
-		Content:   fallbackMessage,
+		Content:   strings.TrimSpace(content),
 		Timestamp: time.Now(),
 	}
 
-	savedMessage, _ := u.InterviewFreeformRepository.AppendMessage(ctx, chatID, aiMessage)
+	if aiMessage.Content == "" {
+		aiMessage.Content = "I could not generate a response yet. Try asking for a practice question or feedback on your answer."
+	}
 
+	savedMessage, err := u.InterviewFreeformRepository.AppendMessage(ctx, chatID, aiMessage)
+	if err != nil {
+		return nil, fmt.Errorf("failed to save AI response: %w", err)
+	}
 	return savedMessage, nil
 }
-
-

@@ -37,8 +37,18 @@ export default function ProtectedWrapper({ children }: ProtectedWrapperProps) {
 
   if (!isReady)
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <h1 className="text-center text-gray-600 text-2xl">Loading...</h1>
+      <div className="flex min-h-screen items-center justify-center px-4">
+        <div className="glass-card px-8 py-6 text-center">
+          <div className="glass-reflection opacity-70" />
+          <div className="relative z-10">
+            <p className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--accent-green)]">
+              JobMate
+            </p>
+            <h1 className="gradient-text mt-2 font-display text-3xl font-semibold">
+              Loading your workspace
+            </h1>
+          </div>
+        </div>
       </div>
     );
 

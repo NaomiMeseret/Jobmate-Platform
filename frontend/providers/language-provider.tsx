@@ -109,6 +109,48 @@ const translations = {
     service: "Service",
     login: "Log In",
     signUp: "Sign Up",
+
+    // App workspace
+    nav_dashboard: "Dashboard",
+    nav_cv: "CV Studio",
+    nav_jobs: "Jobs",
+    nav_interview: "Interview",
+    nav_courses: "Courses",
+    nav_pricing: "Pricing",
+    nav_tips: "Tips",
+    ask_jobmate: "Ask JobMate",
+    signed_in: "Signed in",
+
+    // Dashboard
+    dashboard_eyebrow: "Career command center",
+    dashboard_welcome: "Welcome, {name}",
+    dashboard_description:
+      "Pick the next move in your career workflow. Each card opens a full feature connected to the JobMate API.",
+    dashboard_cv_title: "CV Studio",
+    dashboard_cv_desc: "Upload, analyze, chat with your CV, and find skill gaps.",
+    dashboard_cv_stat: "Upload + AI analysis",
+    dashboard_jobs_title: "Job Search",
+    dashboard_jobs_desc: "Chat with JobMate and receive matched jobs with links.",
+    dashboard_jobs_stat: "Saved job chats",
+    dashboard_interview_title: "Interview Practice",
+    dashboard_interview_desc:
+      "Choose free-form coaching or structured field interviews.",
+    dashboard_interview_stat: "Free-form + structured",
+    dashboard_courses_title: "Course Suggestions",
+    dashboard_courses_desc:
+      "Generate courses from your analyzed CV improvement areas.",
+    dashboard_courses_stat: "CV-based learning",
+    dashboard_general_title: "General Assistant",
+    dashboard_general_desc: "Ask open career questions in a focused AI chat space.",
+    dashboard_general_stat: "Career Q&A",
+    dashboard_tips_title: "Offline Tips",
+    dashboard_tips_desc: "Browse practical advice when you need quick guidance.",
+    dashboard_tips_stat: "Always available",
+    continue: "Continue",
+    dashboard_flow_title: "Suggested flow",
+    dashboard_flow_desc:
+      "Start with CV Studio, analyze your resume, open course suggestions, then use job search and interview practice with stronger context.",
+    dashboard_flow_cta: "Start with CV",
   },
   am: {
     // Header
@@ -205,6 +247,46 @@ const translations = {
     service: "አገልግሎት",
     login: "ግባ",
     signUp: "ተመዝገብ",
+
+    // App workspace
+    nav_dashboard: "ዳሽቦርድ",
+    nav_cv: "CV ስቱዲዮ",
+    nav_jobs: "ስራዎች",
+    nav_interview: "ቃለ መጠይቅ",
+    nav_courses: "ኮርሶች",
+    nav_pricing: "ዋጋ",
+    nav_tips: "ምክሮች",
+    ask_jobmate: "JobMateን ጠይቅ",
+    signed_in: "ገብተዋል",
+
+    // Dashboard
+    dashboard_eyebrow: "የሙያ መቆጣጠሪያ ማዕከል",
+    dashboard_welcome: "እንኳን ደህና መጡ፣ {name}",
+    dashboard_description:
+      "ቀጣዩን የሙያ እርምጃዎን ይምረጡ። እያንዳንዱ ካርድ ከJobMate አገልግሎቶች ጋር የተገናኘ ሙሉ ባህሪ ይከፍታል።",
+    dashboard_cv_title: "CV ስቱዲዮ",
+    dashboard_cv_desc: "CVዎን ይስቀሉ፣ ይተንትኑ፣ ይወያዩበት፣ እና የክህሎት ክፍተቶችን ያግኙ።",
+    dashboard_cv_stat: "መስቀል + AI ትንታኔ",
+    dashboard_jobs_title: "የስራ ፍለጋ",
+    dashboard_jobs_desc: "ከJobMate ጋር ይወያዩ እና ከፕሮፋይልዎ ጋር የሚመጡ ስራዎችን ያግኙ።",
+    dashboard_jobs_stat: "የተቀመጡ የስራ ውይይቶች",
+    dashboard_interview_title: "የቃለ መጠይቅ ልምምድ",
+    dashboard_interview_desc: "ነፃ ውይይት ልምምድ ወይም የተዋቀረ የመስክ ቃለመጠይቅ ይምረጡ።",
+    dashboard_interview_stat: "ነፃ + የተዋቀረ",
+    dashboard_courses_title: "የኮርስ ምክሮች",
+    dashboard_courses_desc: "ከCV ትንታኔዎ የተገኙ የማሻሻያ ቦታዎችን መሰረት ያደረጉ ኮርሶችን ያግኙ።",
+    dashboard_courses_stat: "በCV ላይ የተመሰረተ ትምህርት",
+    dashboard_general_title: "አጠቃላይ ረዳት",
+    dashboard_general_desc: "ስለ ሙያዎ ክፍት ጥያቄዎችን በተለየ የAI ውይይት ቦታ ይጠይቁ።",
+    dashboard_general_stat: "የሙያ ጥያቄና መልስ",
+    dashboard_tips_title: "የኦፍላይን ምክሮች",
+    dashboard_tips_desc: "ፈጣን መመሪያ ሲፈልጉ ተግባራዊ ምክሮችን ያንብቡ።",
+    dashboard_tips_stat: "ሁልጊዜ ዝግጁ",
+    continue: "ቀጥል",
+    dashboard_flow_title: "የተመከረ ፍሰት",
+    dashboard_flow_desc:
+      "በCV ስቱዲዮ ይጀምሩ፣ CVዎን ይተንትኑ፣ የኮርስ ምክሮችን ይክፈቱ፣ ከዚያም የስራ ፍለጋን እና የቃለመጠይቅ ልምምድን በጠንካራ መረጃ ይጠቀሙ።",
+    dashboard_flow_cta: "በCV ጀምር",
   },
 };
 
@@ -214,9 +296,9 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const savedLanguage = localStorage.getItem("jobmate-language") as Language;
-    console.log(savedLanguage);
     if (savedLanguage && (savedLanguage === "en" || savedLanguage === "am")) {
       setLanguageState(savedLanguage);
+      document.documentElement.lang = savedLanguage === "am" ? "am" : "en";
     }
     setMounted(true);
   }, []);

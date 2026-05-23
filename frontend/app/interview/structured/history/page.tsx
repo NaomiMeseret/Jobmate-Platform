@@ -1,11 +1,5 @@
-import StructuredsingleHistory from "@/app/components/interview/structured/single_structured_h";
+import { redirect } from "next/navigation";
 
-const Structured_singleHistory = () => {
-  return (
-    <div>
-      <StructuredsingleHistory />
-    </div>
-  );
-};
-
-export default Structured_singleHistory;
+export default function StructuredSingleHistory() {
+  redirect("/interview/structured/history/all");
+}

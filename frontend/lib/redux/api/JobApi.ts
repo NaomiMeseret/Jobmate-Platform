@@ -1,21 +1,10 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { RootState } from "@/lib/redux/store";
+import { createApi } from "@reduxjs/toolkit/query/react";
 import { JobCardProps } from "@/app/components/jobSearch/Jobcard";
+import { baseQueryWithReauth } from "./baseQuery";
 
 export const jobApi = createApi({
   reducerPath: "jobApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: "https://g6-jobmate-3.onrender.com",
-    prepareHeaders: (headers, { getState }) => {
-      const state = getState() as RootState;
-      const token = state.auth.user?.acces_token;
-      console.log("toooooooooooken", token);
-      if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
-      }
-      return headers;
-    },
-  }),
+  baseQuery: baseQueryWithReauth,
 
   endpoints: (builder) => ({ 
     // 1. Get all job chats

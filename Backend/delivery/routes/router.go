@@ -17,13 +17,13 @@ func SetupRouter(authMiddleware *auth.AuthMiddleware,
 	interviewFreeformController *controllers.InterviewFreeformController,
 	interviewStructuredController *controllers.InterviewStructuredController,
 	jobController *controllers.JobController,
+	paymentController *controllers.PaymentController,
 ) *gin.Engine {
 
 	router := gin.Default()
 
 	router.Use(middlewares.SetupCORS())
 	// router.Use(middlewares.SecurityHeaders())
-
 
 	// register user + auth routes
 	registerUserRoutes(router, authMiddleware, uc, authController)
@@ -43,7 +43,7 @@ func SetupRouter(authMiddleware *auth.AuthMiddleware,
 
 	//cv routes
 	cvGroup := router.Group("/cv")
-	NewCVRouter(*cvController, authMiddleware,*cvGroup)
+	NewCVRouter(*cvController, authMiddleware, *cvGroup)
 
 	// CV Chat routes (protected with auth middleware)
 	cvChatRoutes := router.Group("/cv/chat", authMiddleware.Middleware())
@@ -77,9 +77,17 @@ func SetupRouter(authMiddleware *auth.AuthMiddleware,
 	// delivery/routes/router.go
 	jobRoutes := router.Group("/jobs")
 	{
-		jobRoutes.POST("/chat", authMiddleware.Middleware(), jobController.Chat) 
-		jobRoutes.GET("/chats", authMiddleware.Middleware(), jobController.GetUserChats) 
-		jobRoutes.GET("/chat/:id", authMiddleware.Middleware(), jobController.GetChat) 
+		jobRoutes.POST("/chat", authMiddleware.Middleware(), jobController.Chat)
+		jobRoutes.GET("/chats", authMiddleware.Middleware(), jobController.GetUserChats)
+		jobRoutes.GET("/chat/:id", authMiddleware.Middleware(), jobController.GetChat)
+	}
+
+	paymentRoutes := router.Group("/payments")
+	{
+		paymentRoutes.POST("/chapa/initialize", authMiddleware.Middleware(), paymentController.InitializeChapa)
+		paymentRoutes.GET("/chapa/verify/:tx_ref", paymentController.VerifyChapa)
+		paymentRoutes.GET("/chapa/callback", paymentController.ChapaCallback)
+		paymentRoutes.POST("/chapa/callback", paymentController.ChapaCallback)
 	}
 
 	return router
@@ -105,10 +113,10 @@ func NewAuthRouter(authController controllers.AuthController, authMiddleware *au
 	group.POST("/reset-password", authController.ResetPassword)
 }
 
-func NewCVRouter(cvController controllers.CVController,authMiddleware *auth.AuthMiddleware, group gin.RouterGroup) {
-	group.POST("/",authMiddleware.Middleware(), cvController.UploadCV)
-	group.POST("/:id/analyze",authMiddleware.Middleware(), cvController.AnalyzeCV)
-	group.GET("/suggestions",authMiddleware.Middleware() ,cvController.GenerateSuggestions) 
+func NewCVRouter(cvController controllers.CVController, authMiddleware *auth.AuthMiddleware, group gin.RouterGroup) {
+	group.POST("/", authMiddleware.Middleware(), cvController.UploadCV)
+	group.POST("/:id/analyze", authMiddleware.Middleware(), cvController.AnalyzeCV)
+	group.GET("/suggestions", authMiddleware.Middleware(), cvController.GenerateSuggestions)
 }
 
 func RegisterOAuthRoutes(

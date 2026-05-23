@@ -63,8 +63,6 @@ export type ChatMessageType =
 
 
 
-  import { ReactNode } from "react";
-
   // --------------------- CV Data ---------------------
   export type SkillGap = {
     skillName: string;

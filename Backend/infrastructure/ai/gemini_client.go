@@ -40,8 +40,8 @@ type GeminiProperty struct {
 // --- Response/Message Structs ---
 
 type GeminiPart struct {
-	Text         string               `json:"text,omitempty"`
-	FunctionCall *GeminiFunctionCall  `json:"functionCall,omitempty"`
+	Text         string              `json:"text,omitempty"`
+	FunctionCall *GeminiFunctionCall `json:"functionCall,omitempty"`
 }
 
 type GeminiContent struct {
@@ -75,10 +75,20 @@ type GeminiService struct {
 }
 
 func NewGeminiService(cfg *config.Config) svc.IAIService {
+	model := strings.TrimSpace(cfg.GeminiModelName)
+	if model == "" {
+		model = "gemini-1.5-flash"
+	}
+
+	baseURL := strings.TrimRight(strings.TrimSpace(cfg.GeminiBaseUrl), "/")
+	if baseURL == "" {
+		baseURL = "https://generativelanguage.googleapis.com"
+	}
+
 	return &GeminiService{
-		APIKey:      cfg.GeminiApiKey,
-		Model:       cfg.GeminiModelName,
-		BaseURL:     cfg.GeminiBaseUrl,
+		APIKey:      strings.TrimSpace(cfg.GeminiApiKey),
+		Model:       model,
+		BaseURL:     baseURL,
 		Temperature: cfg.AITemperature,
 		HTTPClient:  &http.Client{Timeout: 30 * time.Second},
 	}
@@ -86,19 +96,33 @@ func NewGeminiService(cfg *config.Config) svc.IAIService {
 
 // --- Implement the IAIService interface ---
 func (gs *GeminiService) GetChatCompletion(ctx context.Context, messages []svc.AIMessage, tools []svc.AITool) (*svc.AIResponse, error) {
+	if strings.TrimSpace(gs.APIKey) == "" {
+		return nil, fmt.Errorf("Gemini API key is not configured. Add GEMINI_API_KEY to Backend/config.env and restart the backend")
+	}
+
 	// Convert domain messages to Gemini format
 	var contents []GeminiContent
 	for _, msg := range messages {
-		// Skip tool messages as Gemini doesn't support them in the same way
+		content := msg.Content
+		role := convertRoleToGemini(msg.Role)
 		if msg.Role == "tool" {
+			role = "user"
+			content = fmt.Sprintf("Tool result for %s:\n%s", msg.ToolCallID, msg.Content)
+		}
+
+		if strings.TrimSpace(content) == "" {
 			continue
 		}
-		
-		part := GeminiPart{Text: msg.Content}
+
+		part := GeminiPart{Text: content}
 		contents = append(contents, GeminiContent{
-			Role:  convertRoleToGemini(msg.Role),
+			Role:  role,
 			Parts: []GeminiPart{part},
 		})
+	}
+
+	if len(contents) == 0 {
+		return nil, fmt.Errorf("Gemini request has no messages")
 	}
 
 	// Convert tools to Gemini format if provided
@@ -138,9 +162,6 @@ func (gs *GeminiService) GetChatCompletion(ctx context.Context, messages []svc.A
 	}
 	defer resp.Body.Close()
 
-	// Debug: Print response status
-	fmt.Printf("Gemini API Status: %s\n", resp.Status)
-
 	if resp.StatusCode != http.StatusOK {
 		// Try to read error response
 		var errorResp map[string]interface{}
@@ -154,9 +175,6 @@ func (gs *GeminiService) GetChatCompletion(ctx context.Context, messages []svc.A
 	if err := json.NewDecoder(resp.Body).Decode(&geminiResponse); err != nil {
 		return nil, fmt.Errorf("failed to decode Gemini API response: %w", err)
 	}
-
-	// Debug: Print raw response
-	fmt.Printf("Gemini Response: %+v\n", geminiResponse)
 
 	// Check for errors in response
 	if geminiResponse.Error.Message != "" {
@@ -176,14 +194,14 @@ func (gs *GeminiService) GetChatCompletion(ctx context.Context, messages []svc.A
 		if part.Text != "" {
 			aiResponse.Content += part.Text + "\n"
 		}
-		
+
 		if part.FunctionCall != nil {
 			// Convert Gemini function call to ToolCall
 			argsJSON, err := json.Marshal(part.FunctionCall.Args)
 			if err != nil {
 				return nil, fmt.Errorf("failed to marshal function arguments: %w", err)
 			}
-			
+
 			toolCall := svc.ToolCall{
 				ID:   fmt.Sprintf("call_%s_%d", part.FunctionCall.Name, time.Now().UnixNano()),
 				Type: "function",
@@ -212,7 +230,7 @@ func (gs *GeminiService) GetCompletion(ctx context.Context, prompt string) (*svc
 			Content: prompt,
 		},
 	}
-	
+
 	return gs.GetChatCompletion(ctx, messages, nil)
 }
 

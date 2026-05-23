@@ -9,7 +9,7 @@ import (
 
 type Config struct {
 	AppEnv  string
-	Port string
+	Port    string
 	BaseURL string
 
 	DBHost     string
@@ -36,22 +36,21 @@ type Config struct {
 	EmailFromName string
 
 	// General AI Configuration
-	AIApiKey       string 
-	AIModelName    string 
-	AIApiBaseUrl   string 
-	AIProvider     string 
-	AITemperature float32 
+	AIApiKey      string
+	AIModelName   string
+	AIApiBaseUrl  string
+	AIProvider    string
+	AITemperature float32
 
 	// Gemini AI Configuration
-	GeminiApiKey       string 
-	GeminiModelName    string 
-	GeminiBaseUrl   string 
-	GeminiProvider     string 
-	
-	// Separate config for OpenAI if needed later for CV specific
-	OpenAIApiKey string 
-	OpenAIModelName string 
+	GeminiApiKey    string
+	GeminiModelName string
+	GeminiBaseUrl   string
+	GeminiProvider  string
 
+	// Separate config for OpenAI if needed later for CV specific
+	OpenAIApiKey    string
+	OpenAIModelName string
 
 	DefaultPageSize int
 	MaxPageSize     int
@@ -60,15 +59,15 @@ type Config struct {
 	LogLevel       string
 	Timezone       string
 
-	GoogleClientID         string
-	GoogleClientSecret     string
-	GoogleRedirectURL      string
-	GithubClientID         string
-	GithubClientSecret     string
-	GithubRedirectURL      string
-	FacebookClientID       string
-	FacebookClientSecret   string
-	FacebookRedirectURL    string
+	GoogleClientID       string
+	GoogleClientSecret   string
+	GoogleRedirectURL    string
+	GithubClientID       string
+	GithubClientSecret   string
+	GithubRedirectURL    string
+	FacebookClientID     string
+	FacebookClientSecret string
+	FacebookRedirectURL  string
 
 	AfricaTalkingUsername string
 	AfricaTalkingApiKey   string
@@ -80,14 +79,20 @@ type Config struct {
 	TwilioFromNumber string
 
 	// JobData
-	JobDataApiKey    string
+	JobDataApiKey string
+
+	// Payments
+	ChapaSecretKey string
+	ChapaBaseURL   string
+	FrontendURL    string
+	BackendURL     string
 }
 
 // LoadConfig loads config.env from project root (if present) and also supports environment variables.
 // If config.env is missing, it falls back to environment variables.
 func LoadConfig() (*Config, error) {
 	// Tell viper to look for config file in the root folder
-	viper.AddConfigPath(".") 
+	viper.AddConfigPath(".")
 	viper.SetConfigName("config")
 	viper.SetConfigType("env")
 	viper.AutomaticEnv()
@@ -96,9 +101,34 @@ func LoadConfig() (*Config, error) {
 	_ = viper.ReadInConfig()
 
 	// Now populate your config struct
+	geminiModel := viper.GetString("GEMINI_MODEL_NAME")
+	if strings.TrimSpace(geminiModel) == "" {
+		geminiModel = "gemini-1.5-flash"
+	}
+
+	geminiBaseURL := viper.GetString("GEMINI_BASE_URL")
+	if strings.TrimSpace(geminiBaseURL) == "" {
+		geminiBaseURL = "https://generativelanguage.googleapis.com"
+	}
+
+	chapaBaseURL := viper.GetString("CHAPA_BASE_URL")
+	if strings.TrimSpace(chapaBaseURL) == "" {
+		chapaBaseURL = "https://api.chapa.co/v1"
+	}
+
+	frontendURL := viper.GetString("FRONTEND_URL")
+	if strings.TrimSpace(frontendURL) == "" {
+		frontendURL = "http://localhost:3000"
+	}
+
+	backendURL := viper.GetString("BACKEND_URL")
+	if strings.TrimSpace(backendURL) == "" {
+		backendURL = viper.GetString("BASE_URL")
+	}
+
 	cfg := &Config{
 		AppEnv:  viper.GetString("APP_ENV"),
-		Port: viper.GetString("PORT"),
+		Port:    viper.GetString("PORT"),
 		BaseURL: viper.GetString("BASE_URL"),
 
 		DBHost:     viper.GetString("DB_HOST"),
@@ -110,7 +140,7 @@ func LoadConfig() (*Config, error) {
 
 		JWTSecretKey:              viper.GetString("JWT_SECRET_KEY"),
 		JWTExpirationMinutes:      viper.GetInt("JWT_EXPIRATION_MINUTES"),
-		JWTAccessTokenExpiry:       time.Duration(viper.GetInt("JWT_ACCESS_TOKEN_EXPIRY")) * time.Minute,
+		JWTAccessTokenExpiry:      time.Duration(viper.GetInt("JWT_ACCESS_TOKEN_EXPIRY")) * time.Minute,
 		RefreshTokenSecret:        viper.GetString("REFRESH_TOKEN_SECRET"),
 		RefreshTokenExpirationMin: viper.GetInt("REFRESH_TOKEN_EXPIRATION_MINUTES"),
 
@@ -123,20 +153,20 @@ func LoadConfig() (*Config, error) {
 		EmailFromName: viper.GetString("EMAIL_FROM_NAME"),
 
 		// General AI Configuration
-		AIApiKey: viper.GetString("AI_API_KEY"),        
-		AIModelName:  viper.GetString("AI_MODEL_NAME"),  
-		AIApiBaseUrl: viper.GetString("AI_API_BASE_URL"), 
-		AIProvider:   viper.GetString("AI_PROVIDER"),    
-		AITemperature:         float32(viper.GetFloat64("AI_TEMPERATURE")), 
+		AIApiKey:      viper.GetString("AI_API_KEY"),
+		AIModelName:   viper.GetString("AI_MODEL_NAME"),
+		AIApiBaseUrl:  viper.GetString("AI_API_BASE_URL"),
+		AIProvider:    viper.GetString("AI_PROVIDER"),
+		AITemperature: float32(viper.GetFloat64("AI_TEMPERATURE")),
 
 		// Gemini Specific
-		GeminiApiKey: viper.GetString("GEMINI_API_KEY"),        
-		GeminiModelName:  viper.GetString("GEMINI_MODEL_NAME"),  
-		GeminiBaseUrl: viper.GetString("GEMINI_BASE_URL"), 
-		GeminiProvider:   viper.GetString("GEMINI_PROVIDER"),
-		
+		GeminiApiKey:    viper.GetString("GEMINI_API_KEY"),
+		GeminiModelName: geminiModel,
+		GeminiBaseUrl:   geminiBaseURL,
+		GeminiProvider:  viper.GetString("GEMINI_PROVIDER"),
+
 		// OpenAI Specific (for CV analysis, if separate)
-		OpenAIApiKey: viper.GetString("OPENAI_API_KEY"),
+		OpenAIApiKey:    viper.GetString("OPENAI_API_KEY"),
 		OpenAIModelName: viper.GetString("OPENAI_MODEL_NAME"),
 
 		DefaultPageSize: viper.GetInt("DEFAULT_PAGE_SIZE"),
@@ -161,13 +191,19 @@ func LoadConfig() (*Config, error) {
 		TwilioAuthToken:  viper.GetString("TWILIO_AUTH_TOKEN"),
 		TwilioFromNumber: viper.GetString("TWILIO_FROM_NUMBER"),
 
-		// Africa's Talking 
+		// Africa's Talking
 		AfricaTalkingUsername: viper.GetString("AFRICASTALKING_USERNAME"),
 		AfricaTalkingApiKey:   viper.GetString("AFRICASTALKING_API_KEY"),
 		AfricaTalkingSenderId: viper.GetString("AFRICASTALKING_SENDER_ID"),
 
 		// JobData
 		JobDataApiKey: viper.GetString("JOBDATA_API_KEY"),
+
+		// Payments
+		ChapaSecretKey: viper.GetString("CHAPA_SECRET_KEY"),
+		ChapaBaseURL:   chapaBaseURL,
+		FrontendURL:    frontendURL,
+		BackendURL:     backendURL,
 	}
 
 	return cfg, nil

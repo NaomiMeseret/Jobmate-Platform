@@ -6,6 +6,7 @@ import authReducer from "./authSlice";
 
 import { jobApi } from "./api/JobApi";
 import { interviewApi } from "./api/interviewApi";
+import { paymentApi } from "./api/paymentApi";
 
 export const store = configureStore({
   reducer: {
@@ -17,6 +18,7 @@ export const store = configureStore({
     [jobApi.reducerPath]: jobApi.reducer,
 
     [interviewApi.reducerPath]: interviewApi.reducer,
+    [paymentApi.reducerPath]: paymentApi.reducer,
 
   },
   middleware: (getDefaultMiddleware) =>
@@ -27,7 +29,8 @@ export const store = configureStore({
 
       .concat(jobApi.middleware)
 
-      .concat(interviewApi.middleware),
+      .concat(interviewApi.middleware)
+      .concat(paymentApi.middleware),
 
 });
 

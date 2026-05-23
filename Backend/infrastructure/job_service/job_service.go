@@ -22,9 +22,9 @@ func NewJobService(apiKey string) *JobService {
 
 func (s *JobService) GetCuratedJobs(field, lookingFor, experience string, skills []string, language string) ([]models.Job, string, error) {
 	log.Printf("JOB SEARCH - Field: %s, Type: %s, Experience: %s, Skills: %v", field, lookingFor, experience, skills)
-	
+
 	var jobs []models.Job
-	
+
 	// fetch from JobDataAPI for local jobs
 	if lookingFor == "local" {
 		localJobs, err := s.fetchJobsFromJobDataAPI(field) // Changed to use method receiver
@@ -32,7 +32,7 @@ func (s *JobService) GetCuratedJobs(field, lookingFor, experience string, skills
 			jobs = append(jobs, localJobs...)
 		}
 	}
-	
+
 	// fetch from Upwork for remote/freelance jobs
 	if lookingFor == "remote" || lookingFor == "freelance" {
 		upworkJobs, err := fetchUpworkJobs(field, skills, experience)
@@ -42,10 +42,10 @@ func (s *JobService) GetCuratedJobs(field, lookingFor, experience string, skills
 			log.Printf("Upwork fetch failed: %v", err)
 		}
 	}
-	
+
 	// Filter out outdated jobs and validate links
 	filteredJobs := s.filterValidJobs(jobs)
-	
+
 	if len(filteredJobs) == 0 {
 		userMsg := "No current job openings found for your criteria. Please try different search terms or check back later."
 		if language == "am" {
@@ -53,7 +53,7 @@ func (s *JobService) GetCuratedJobs(field, lookingFor, experience string, skills
 		}
 		return nil, userMsg, errors.New("no current jobs found")
 	}
-	
+
 	msg := fmt.Sprintf("Found %d current opportunities for you:", len(filteredJobs))
 	if language == "am" {
 		msg = fmt.Sprintf("ለ%s የሚስማሙ %d ስራዎች ተገኝተዋል።", field, len(filteredJobs))
@@ -65,21 +65,21 @@ func (s *JobService) GetCuratedJobs(field, lookingFor, experience string, skills
 
 func (s *JobService) filterValidJobs(jobs []models.Job) []models.Job {
 	var validJobs []models.Job
-	
+
 	for _, job := range jobs {
 		// Basic validation - ensure job has required fields
 		if job.Title == "" || job.Company == "" || job.Link == "" {
 			continue
 		}
-		
+
 		// Check if link is potentially valid (simple validation)
 		if !strings.HasPrefix(job.Link, "http") {
 			continue
 		}
-		
+
 		validJobs = append(validJobs, job)
 	}
-	
+
 	return validJobs
 }
 
@@ -164,42 +164,78 @@ func (s *JobService) fetchJobsFromJobDataAPI(titleFilter string) ([]models.Job, 
 
 // fetch jobs from Upwork for remote/freelance positions
 func fetchUpworkJobs(field string, skills []string, experience string) ([]models.Job, error) {
-    
-	searchQuery := url.QueryEscape(field)
-    if len(skills) > 0 {
-        searchQuery = url.QueryEscape(fmt.Sprintf("%s %s", field, skills[0]))
-    }
-    
-    searchURL := fmt.Sprintf("https://www.upwork.com/ab/jobs/search/?q=%s", searchQuery)
-    
-    var jobs []models.Job
-    
-    jobs = append(jobs, models.Job{
-        Title:        fmt.Sprintf("%s Developer Jobs", field),
-        Company:      "Upwork",
-        Location:     "Remote",
-        Requirements: skills,
-        Type:         "freelance",
-        Source:       "Upwork",
-        Link:         searchURL,
-        Language:     "en",
-    })
-    
-    for _, skill := range skills {
-        if skill != "" {
-            skillSearchURL := fmt.Sprintf("https://www.upwork.com/ab/jobs/search/?q=%s", url.QueryEscape(skill))
-            jobs = append(jobs, models.Job{
-                Title:        fmt.Sprintf("%s Developer Jobs", skill),
-                Company:      "Upwork",
-                Location:     "Remote", 
-                Requirements: []string{skill},
-                Type:         "freelance",
-                Source:       "Upwork",
-                Link:         skillSearchURL,
-                Language:     "en",
-            })
-        }
-    }
-    
-    return jobs, nil
+
+	field = strings.TrimSpace(field)
+	if field == "" {
+		field = "backend"
+	}
+
+	allTerms := append([]string{field}, skills...)
+	searchQuery := strings.Join(nonEmpty(allTerms), " ")
+	searchURL := buildUpworkSearchURL(searchQuery)
+
+	var jobs []models.Job
+	jobs = append(jobs, models.Job{
+		Title:        fmt.Sprintf("Remote %s opportunities", titleize(field)),
+		Company:      "Upwork search",
+		Location:     "Remote",
+		Requirements: nonEmpty(skills),
+		Type:         "remote/freelance",
+		Source:       "Upwork",
+		Link:         searchURL,
+		Language:     "en",
+	})
+
+	for _, skill := range nonEmpty(skills) {
+		skillSearchURL := buildUpworkSearchURL(fmt.Sprintf("%s %s", field, skill))
+		jobs = append(jobs, models.Job{
+			Title:        fmt.Sprintf("%s + %s remote projects", titleize(field), titleize(skill)),
+			Company:      "Upwork search",
+			Location:     "Remote",
+			Requirements: []string{skill},
+			Type:         "remote/freelance",
+			Source:       "Upwork",
+			Link:         skillSearchURL,
+			Language:     "en",
+		})
+	}
+
+	return jobs, nil
+}
+
+func buildUpworkSearchURL(query string) string {
+	escapedQuery := url.QueryEscape(strings.TrimSpace(query))
+	if escapedQuery == "" {
+		return "https://www.upwork.com/nx/search/jobs/"
+	}
+	return fmt.Sprintf("https://www.upwork.com/nx/search/jobs/?q=%s", escapedQuery)
+}
+
+func nonEmpty(values []string) []string {
+	clean := make([]string, 0, len(values))
+	seen := map[string]bool{}
+	for _, value := range values {
+		trimmed := strings.TrimSpace(value)
+		if trimmed == "" {
+			continue
+		}
+		key := strings.ToLower(trimmed)
+		if seen[key] {
+			continue
+		}
+		seen[key] = true
+		clean = append(clean, trimmed)
+	}
+	return clean
+}
+
+func titleize(value string) string {
+	words := strings.Fields(value)
+	for i, word := range words {
+		if len(word) == 0 {
+			continue
+		}
+		words[i] = strings.ToUpper(word[:1]) + word[1:]
+	}
+	return strings.Join(words, " ")
 }

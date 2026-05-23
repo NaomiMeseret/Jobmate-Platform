@@ -1,10 +1,5 @@
-import FreeformChatHistory from "@/app/components/interview/freeflow/single_freeflow_H";
-const Freeformchat_History = () => {
-  return (
-    <div>
-      <FreeformChatHistory />
-    </div>
-  );
-};
+import { redirect } from "next/navigation";
 
-export default Freeformchat_History;
+export default function FreeformchatHistory() {
+  redirect("/interview/freefrom/History/all");
+}

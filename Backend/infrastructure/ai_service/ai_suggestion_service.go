@@ -60,6 +60,10 @@ func NewGeminiAISuggestionService(model, apiKey string) svc.AISuggestionService 
 }
 
 func (s *GeminiAISuggestionService) Analyze(ctx context.Context, cvText string) (*model.AISuggestions, error) {
+	if strings.TrimSpace(s.apiKey) == "" {
+		return nil, fmt.Errorf("Gemini API key is not configured")
+	}
+
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
 		APIKey: s.apiKey,
 	})
@@ -100,11 +104,7 @@ CV Text:
 	if err != nil {
 		return nil, fmt.Errorf("AI generation failed: %w", err)
 	}
-	resp := strings.TrimSpace(result.Text())
-	resp = strings.TrimPrefix(resp, "```json")
-	resp = strings.TrimPrefix(resp, "```")
-	resp = strings.TrimSuffix(resp, "```")
-	resp = strings.TrimSpace(resp)
+	resp := cleanGeminiJSON(result.Text())
 
 	var aiResp aiResponse
 	if err := json.Unmarshal([]byte(resp), &aiResp); err != nil {
@@ -167,6 +167,10 @@ CV Text:
 }
 
 func (s *GeminiAISuggestionService) GenerateSuggestions(ctx context.Context, cv *model.CV, skillGaps []*model.SkillGap) (*model.Suggestion, error) {
+	if strings.TrimSpace(s.apiKey) == "" {
+		return nil, fmt.Errorf("Gemini API key is not configured")
+	}
+
 	client, err := genai.NewClient(ctx, &genai.ClientConfig{
 		APIKey: s.apiKey,
 	})
@@ -184,7 +188,6 @@ func (s *GeminiAISuggestionService) GenerateSuggestions(ctx context.Context, cv 
 		}
 		skillGapText = strings.Join(gaps, "\n")
 	}
-
 
 	prompt := fmt.Sprintf(`You are a career advisor AI. Based on the following CV analysis and skill gaps, suggest relevant courses and general career advice. Reply in the langauge the extracted skills and expreience are written in.
 	Important: For "url", provide a real publicly accessible course link from trusted providers (Coursera, edX, Udemy, LinkedIn Learning, etc). Detect the language of the CV data (skills, experience, education). The entire response (course titles, descriptions, advice) must be written in that language,
@@ -215,11 +218,7 @@ Return the result in **only JSON** with this structure:
 	if err != nil {
 		return nil, fmt.Errorf("AI generation failed: %w", err)
 	}
-	resp := strings.TrimSpace(result.Text())
-	resp = strings.TrimPrefix(resp, "```json")
-	resp = strings.TrimPrefix(resp, "```")
-	resp = strings.TrimSuffix(resp, "```")
-	resp = strings.TrimSpace(resp)
+	resp := cleanGeminiJSON(result.Text())
 
 	var aiResp aiSuggestionResponse
 	if err := json.Unmarshal([]byte(resp), &aiResp); err != nil {
@@ -230,6 +229,22 @@ Return the result in **only JSON** with this structure:
 	suggestion := mapAISuggestionToDomain(aiResp)
 	return suggestion, nil
 
+}
+
+func cleanGeminiJSON(raw string) string {
+	resp := strings.TrimSpace(raw)
+	resp = strings.TrimPrefix(resp, "```json")
+	resp = strings.TrimPrefix(resp, "```")
+	resp = strings.TrimSuffix(resp, "```")
+	resp = strings.TrimSpace(resp)
+
+	start := strings.Index(resp, "{")
+	end := strings.LastIndex(resp, "}")
+	if start >= 0 && end > start {
+		return strings.TrimSpace(resp[start : end+1])
+	}
+
+	return resp
 }
 
 func mapAISuggestionToDomain(resp aiSuggestionResponse) *model.Suggestion {

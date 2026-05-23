@@ -1,5 +1,5 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import type { RootState } from "../store";
+import { createApi } from "@reduxjs/toolkit/query/react";
+import { baseQueryWithReauth } from "./baseQuery";
 import type {
   GetFreeformUserChatsResponse,
   GetStructuredUserChatsResponse,
@@ -7,26 +7,7 @@ import type {
 
 export const interviewApi = createApi({
   reducerPath: "interviewApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: "https://g6-jobmate-3.onrender.com",
-    prepareHeaders: (headers, { getState }) => {
-      // 🔑 attach JWT from state if available
-      // const state = getState() as RootState;
-      // console.log("Auth state in prepareHeaders:", state.auth);
-      // const token = (getState() as any).auth?.accessToken;
-      // console.log("Token in prepareHeaders:", token);
-      const state = getState() as RootState;
-      // console.log("Auth state in prepareHeaders:", state.auth);
-      // //const token = (getState() as RootState).auth.accessToken;
-      const token = state.auth.accessToken; // ✅ correct path
-      console.log("Token in prepareHeaders:", token);
-
-      if (token) {
-        headers.set("Authorization", `Bearer ${token}`);
-      }
-      return headers;
-    },
-  }),
+  baseQuery: baseQueryWithReauth,
   endpoints: (builder) => ({
     // ===== FREEFORM =====
     createFreeformSession: builder.mutation({
