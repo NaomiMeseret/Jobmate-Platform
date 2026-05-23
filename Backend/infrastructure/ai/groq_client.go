@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/tsigemariamzewdu/JobMate-backend/delivery/dto"
@@ -39,16 +40,30 @@ type GroqClient struct {
 }
 
 func NewGroqClient(cfg *config.Config) *GroqClient {
+	model := strings.TrimSpace(cfg.AIModelName)
+	if model == "" {
+		model = "llama-3.1-8b-instant"
+	}
+
+	baseURL := strings.TrimRight(strings.TrimSpace(cfg.AIApiBaseUrl), "/")
+	if baseURL == "" {
+		baseURL = "https://api.groq.com/openai/v1"
+	}
+
 	return &GroqClient{
-		APIKey:      cfg.AIApiKey,
-		Model:       cfg.AIModelName,
-		BaseURL:     cfg.AIApiBaseUrl,
+		APIKey:      strings.TrimSpace(cfg.AIApiKey),
+		Model:       model,
+		BaseURL:     baseURL,
 		Temperature: cfg.AITemperature,
 		HTTPClient:  &http.Client{Timeout: 30 * time.Second},
 	}
 }
 
 func (gc *GroqClient) GetChatCompletion(ctx context.Context, messages []dto.GroqAIMessageDTO) (*models.GroqAIMessage, error) {
+	if strings.TrimSpace(gc.APIKey) == "" {
+		return nil, fmt.Errorf("Groq API key is not configured. Add AI_API_KEY to Backend/config.env to enable Groq fallback")
+	}
+
 	requestBody := struct {
 		Messages    []dto.GroqAIMessageDTO `json:"messages"`
 		Model       string                 `json:"model"`
