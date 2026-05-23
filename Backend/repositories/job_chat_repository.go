@@ -50,6 +50,22 @@ func (r *JobChatRepository) AppendMessage(ctx context.Context, chatID string, me
 	return err
 }
 
+func (r *JobChatRepository) UpdateSearchResults(ctx context.Context, chatID string, query map[string]any, jobResults []models.Job) error {
+	objID, err := primitive.ObjectIDFromHex(chatID)
+	if err != nil {
+		return err
+	}
+	update := bson.M{
+		"$set": bson.M{
+			"job_search_query": query,
+			"job_results":      jobResults,
+			"updated_at":       time.Now(),
+		},
+	}
+	_, err = r.collection.UpdateByID(ctx, objID, update)
+	return err
+}
+
 func (r *JobChatRepository) GetJobChatByID(ctx context.Context, chatID string) (*models.JobChat, error) {
 	objID, err := primitive.ObjectIDFromHex(chatID)
 	if err != nil {
