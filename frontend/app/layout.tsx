@@ -24,6 +24,10 @@ export const metadata: Metadata = {
   description:
     "AI-powered career assistant for Ethiopian youth - CV feedback, job matching, and interview practice",
   generator: "v0.app",
+  icons: {
+    icon: [{ url: "/icon.svg?v=3", type: "image/svg+xml" }],
+    shortcut: "/icon.svg?v=3",
+  },
 };
 
 export default function RootLayout({
