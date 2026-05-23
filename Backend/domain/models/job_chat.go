@@ -5,8 +5,9 @@ import (
 )
 
 type JobChatMessage struct {
-	Role      string    `bson:"role" json:"role"` 
+	Role      string    `bson:"role" json:"role"`
 	Message   string    `bson:"message" json:"message"`
+	Jobs      []Job     `bson:"jobs,omitempty" json:"jobs,omitempty"`
 	Timestamp time.Time `bson:"timestamp" json:"timestamp"`
 }
 
