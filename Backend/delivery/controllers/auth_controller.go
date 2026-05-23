@@ -8,13 +8,13 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/tsigemariamzewdu/JobMate-backend/domain"
-	"github.com/tsigemariamzewdu/JobMate-backend/domain/models"
 	uc "github.com/tsigemariamzewdu/JobMate-backend/domain/interfaces/usecases"
+	"github.com/tsigemariamzewdu/JobMate-backend/domain/models"
 )
 
 // AuthController handles HTTP requests related to authentication.
 type AuthController struct {
-	AuthUsecase uc .IAuthUsecase
+	AuthUsecase uc.IAuthUsecase
 }
 
 // NewAuthController creates a new instance of AuthController with its dependencies.
@@ -49,6 +49,16 @@ func (ac *AuthController) Register(c *gin.Context) {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid email format"})
 		case errors.Is(err, domain.ErrEmailAlreadyExists):
 			c.JSON(http.StatusConflict, gin.H{"error": "Email already exists"})
+		case errors.Is(err, domain.ErrWeakPassword):
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Password does not meet requirements"})
+		case errors.Is(err, domain.ErrMissingOTP):
+			c.JSON(http.StatusBadRequest, gin.H{"error": "OTP is required"})
+		case errors.Is(err, domain.ErrOTPExpired):
+			c.JSON(http.StatusBadRequest, gin.H{"error": "OTP has expired"})
+		case errors.Is(err, domain.ErrInvalidOTP):
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid OTP"})
+		case errors.Is(err, domain.ErrDatabaseOperationFailed):
+			c.JSON(http.StatusServiceUnavailable, gin.H{"error": "Database temporarily unavailable"})
 		case errors.Is(err, domain.ErrPasswordHashingFailed):
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to process password"})
 		case errors.Is(err, domain.ErrTokenGenerationFailed):
@@ -113,15 +123,13 @@ func (ac *AuthController) Login(c *gin.Context) {
 
 	// prepare sanitized user response
 	safeUser := gin.H{
-		"user_id":   result.User.UserID,
-		"email":     result.User.Email,
-		"firstName": result.User.FirstName,
-		"lastName":  result.User.LastName,
-		"provider":  result.User.Provider,
-		"acces_token":result.AccessToken,
+		"user_id":     result.User.UserID,
+		"email":       result.User.Email,
+		"firstName":   result.User.FirstName,
+		"lastName":    result.User.LastName,
+		"provider":    result.User.Provider,
+		"acces_token": result.AccessToken,
 	}
-
-	
 
 	http.SetCookie(c.Writer, &http.Cookie{
 		Name:     "refresh_token",
@@ -152,17 +160,16 @@ func (au *AuthController) Logout(c *gin.Context) {
 		return
 	}
 	if err != nil || token == "" {
-        c.JSON(http.StatusBadRequest, gin.H{"error": "missing refresh token"})
-        return
-    }
+		c.JSON(http.StatusBadRequest, gin.H{"error": "missing refresh token"})
+		return
+	}
 
-	err = au.AuthUsecase.Logout(c, userID,token)
+	err = au.AuthUsecase.Logout(c, userID, token)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "failed to log user out", "details": err.Error()})
 		return
 	}
 
-	
 	http.SetCookie(c.Writer, &http.Cookie{
 		Name:     "refresh_token",
 		Value:    "",
@@ -174,7 +181,6 @@ func (au *AuthController) Logout(c *gin.Context) {
 	})
 	c.Status(http.StatusOK)
 }
-
 
 // RefreshToken is an HTTP handler that handles the token refreshing endpoint.
 func (au *AuthController) RefreshToken(c *gin.Context) {
@@ -192,14 +198,14 @@ func (au *AuthController) RefreshToken(c *gin.Context) {
 		return
 	}
 
-	
 	// Return a success response to the client.
 	c.JSON(http.StatusOK, gin.H{
-		"message":    "Token refreshed successfully",
+		"message":      "Token refreshed successfully",
 		"access_token": newAccessToken,
-		"expires_in": int(expiresIn.Seconds()),
+		"expires_in":   int(expiresIn.Seconds()),
 	})
 }
+
 // ResetPassword handles password reset with OTP verification
 func (ac *AuthController) ResetPassword(c *gin.Context) {
 	ctx := c.Request.Context()
