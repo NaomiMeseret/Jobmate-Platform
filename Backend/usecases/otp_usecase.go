@@ -110,7 +110,9 @@ func (u *OTPUsecase) RequestOTP(ctx context.Context, req *models.OTPRequest) err
 	if err := u.OTPRepo.CreateVerificationCode(ctx, code); err != nil {
 		return errors.New("failed to save verification code")
 	}
-	fmt.Printf("[DEV OTP] registration email=%s code=%s expires_at=%s\n", *req.Email, otp, code.ExpiresAt.Format(time.RFC3339))
+	if err := u.sendOTPEmail(*req.Email, "Your JobMate verification code", generateVerificationEmailBody(otp), "registration", otp, code.ExpiresAt); err != nil {
+		return err
+	}
 
 	// // Send SMS (stub: print to log)
 	// if err := u.OTPSender.SendOTP(normalizedPhone, otp); err != nil {
@@ -119,6 +121,20 @@ func (u *OTPUsecase) RequestOTP(ctx context.Context, req *models.OTPRequest) err
 	// }
 
 	// Always return nil (generic response handled in controller)
+	return nil
+}
+
+func (u *OTPUsecase) sendOTPEmail(to, subject, body, otpType, otp string, expiresAt time.Time) error {
+	if u.EmailService != nil {
+		if err := u.EmailService.SendEmail(to, subject, body); err == nil {
+			return nil
+		} else {
+			fmt.Printf("[OTP] email send failed for %s: %v\n", to, err)
+			return errors.New("failed to send OTP email")
+		}
+	}
+
+	fmt.Printf("[DEV OTP] %s email=%s code=%s expires_at=%s\n", otpType, to, otp, expiresAt.Format(time.RFC3339))
 	return nil
 }
 
@@ -157,7 +173,7 @@ func generateVerificationEmailBody(otp string) string {
         </span>
       </p>
       
-      <p>This OTP is valid for <strong>10 minutes</strong> and can only be used once.</p>
+      <p>This OTP is valid for <strong>5 minutes</strong> and can only be used once.</p>
       <p>If you didn’t request this, you can safely ignore this email.</p>
       <p style="margin-top: 40px;">— The Team</p>
     </div>
@@ -206,7 +222,9 @@ func (u *OTPUsecase) RequestPasswordResetOTP(ctx context.Context, email string) 
 		return errors.New("failed to save verification code")
 	}
 
-	fmt.Printf("[DEV OTP] password_reset email=%s code=%s expires_at=%s\n", email, otp, code.ExpiresAt.Format(time.RFC3339))
+	if err := u.sendOTPEmail(email, "Reset your JobMate password", generatePasswordResetEmailBody(otp), "password_reset", otp, code.ExpiresAt); err != nil {
+		return err
+	}
 
 	return nil
 }
