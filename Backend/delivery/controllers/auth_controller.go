@@ -17,6 +17,14 @@ type AuthController struct {
 	AuthUsecase uc.IAuthUsecase
 }
 
+func refreshCookieSettings(c *gin.Context) (bool, http.SameSite) {
+	isHTTPS := c.Request.TLS != nil || c.GetHeader("X-Forwarded-Proto") == "https"
+	if isHTTPS {
+		return true, http.SameSiteNoneMode
+	}
+	return false, http.SameSiteLaxMode
+}
+
 // NewAuthController creates a new instance of AuthController with its dependencies.
 func NewAuthController(authUsecase uc.IAuthUsecase) *AuthController {
 	return &AuthController{
@@ -131,13 +139,14 @@ func (ac *AuthController) Login(c *gin.Context) {
 		"acces_token": result.AccessToken,
 	}
 
+	secureCookie, sameSite := refreshCookieSettings(c)
 	http.SetCookie(c.Writer, &http.Cookie{
 		Name:     "refresh_token",
 		Value:    result.RefreshToken,
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   false,
-		SameSite: http.SameSiteLaxMode,
+		Secure:   secureCookie,
+		SameSite: sameSite,
 		MaxAge:   int(result.ExpiresIn.Seconds()),
 	})
 
@@ -170,13 +179,14 @@ func (au *AuthController) Logout(c *gin.Context) {
 		return
 	}
 
+	secureCookie, sameSite := refreshCookieSettings(c)
 	http.SetCookie(c.Writer, &http.Cookie{
 		Name:     "refresh_token",
 		Value:    "",
 		Path:     "/",
 		HttpOnly: true,
-		Secure:   true,
-		SameSite: http.SameSiteLaxMode,
+		Secure:   secureCookie,
+		SameSite: sameSite,
 		MaxAge:   -1,
 	})
 	c.Status(http.StatusOK)
