@@ -108,7 +108,7 @@ func (u *OTPUsecase) RequestOTP(ctx context.Context, req *models.OTPRequest) err
 		CreatedAt: time.Now(),
 	}
 	if err := u.OTPRepo.CreateVerificationCode(ctx, code); err != nil {
-		return errors.New("failed to save verification code")
+		return fmt.Errorf("failed to save verification code: %w", err)
 	}
 	if err := u.sendOTPEmail(*req.Email, "Your JobMate verification code", generateVerificationEmailBody(otp), "registration", otp, code.ExpiresAt); err != nil {
 		return err
@@ -219,7 +219,7 @@ func (u *OTPUsecase) RequestPasswordResetOTP(ctx context.Context, email string) 
 	}
 
 	if err := u.OTPRepo.CreateVerificationCode(ctx, code); err != nil {
-		return errors.New("failed to save verification code")
+		return fmt.Errorf("failed to save verification code: %w", err)
 	}
 
 	if err := u.sendOTPEmail(email, "Reset your JobMate password", generatePasswordResetEmailBody(otp), "password_reset", otp, code.ExpiresAt); err != nil {
