@@ -3,6 +3,7 @@ package controllers
 import (
 	"context"
 	"errors"
+	"log"
 	"time"
 
 	"github.com/tsigemariamzewdu/JobMate-backend/delivery/dto"
@@ -33,6 +34,7 @@ func (c *OtpController) RequestOTP(ctx *gin.Context) {
 	ip := ctx.ClientIP()
 	otpReq := dtoToDomainOTPRequest(req, ip)
 	if err := c.AuthUsecase.RequestOTP(context.Background(), &otpReq); err != nil {
+		log.Printf("request OTP failed for email=%s ip=%s: %v", safeEmail(req.Email), ip, err)
 		switch {
 		case errors.Is(err, usecases.ErrEmailValidationFailed):
 			ctx.JSON(http.StatusBadRequest, gin.H{"error": "Invalid email address"})
@@ -72,6 +74,7 @@ func (oc *OtpController) RequestPasswordResetOTP(c *gin.Context) {
 
 	err := oc.AuthUsecase.RequestPasswordResetOTP(ctx, input.Email)
 	if err != nil {
+		log.Printf("password reset OTP failed for email=%s: %v", input.Email, err)
 		// Generic error handling - you can customize this based on your needs
 		c.JSON(http.StatusInternalServerError, gin.H{
 			"error":   "Failed to send password reset OTP",
@@ -81,4 +84,11 @@ func (oc *OtpController) RequestPasswordResetOTP(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Password reset OTP sent to your email"})
+}
+
+func safeEmail(email *string) string {
+	if email == nil {
+		return ""
+	}
+	return *email
 }

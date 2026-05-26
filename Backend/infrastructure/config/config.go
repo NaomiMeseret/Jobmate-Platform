@@ -34,6 +34,7 @@ type Config struct {
 	SMTPKey       string
 	EmailFrom     string
 	EmailFromName string
+	BrevoAPIKey   string
 
 	// General AI Configuration
 	AIApiKey      string
@@ -136,7 +137,7 @@ func LoadConfig() (*Config, error) {
 		DBUser:     viper.GetString("DB_USER"),
 		DBPassword: viper.GetString("DB_PASSWORD"),
 		DBName:     viper.GetString("DB_NAME"),
-		DBUri:      viper.GetString("DB_URI"),
+		DBUri:      strings.TrimSpace(viper.GetString("DB_URI")),
 
 		JWTSecretKey:              viper.GetString("JWT_SECRET_KEY"),
 		JWTExpirationMinutes:      viper.GetInt("JWT_EXPIRATION_MINUTES"),
@@ -151,6 +152,7 @@ func LoadConfig() (*Config, error) {
 		SMTPKey:       viper.GetString("SMTP_KEY"),
 		EmailFrom:     viper.GetString("EMAIL_FROM"),
 		EmailFromName: viper.GetString("EMAIL_FROM_NAME"),
+		BrevoAPIKey:   viper.GetString("BREVO_API_KEY"),
 
 		// General AI Configuration
 		AIApiKey:      viper.GetString("AI_API_KEY"),

@@ -61,7 +61,7 @@ func main() {
 
 	// Initialize services
 	phoneValidator := &authinfra.PhoneValidatorImpl{}
-	emailService := emailinfra.NewSMTPService(cfg.SMTPHost, cfg.SMTPPort, cfg.SMTPUsername, cfg.SMTPPassword, cfg.EmailFrom)
+	emailService := emailinfra.NewEmailService(cfg)
 	chapaClient := paymentinfra.NewChapaClient(cfg.ChapaSecretKey, cfg.ChapaBaseURL)
 
 	otpSender, err := authinfra.NewOTPSenderFromEnv(cfg)
