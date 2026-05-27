@@ -1,263 +1,228 @@
-# 💼 JobMate - AI-Powered Career Companion for Africa
+# JobMate - AI-Powered Career Companion for Africa
 
-[![Flutter](https://img.shields.io/badge/Flutter-02569B?style=for-the-badge&logo=flutter&logoColor=white)](https://flutter.dev)
 [![Next.js](https://img.shields.io/badge/Next.js-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org)
 [![Go](https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white)](https://golang.org)
 [![MongoDB](https://img.shields.io/badge/MongoDB-4EA94B?style=for-the-badge&logo=mongodb&logoColor=white)](https://mongodb.com)
 [![Google Gemini](https://img.shields.io/badge/Google%20Gemini-4285F4?style=for-the-badge&logo=google&logoColor=white)](https://ai.google.dev)
-[![Material Design](https://img.shields.io/badge/Material%20Design%203-757575?style=for-the-badge&logo=material-design&logoColor=white)](https://m3.material.io)
+[![Groq](https://img.shields.io/badge/Groq-FF6B00?style=for-the-badge&logoColor=white)](https://groq.com)
+[![Chapa](https://img.shields.io/badge/Chapa-Payments-0F9D58?style=for-the-badge)](https://chapa.co)
 
-> **A comprehensive AI-powered career development platform specifically designed to address youth unemployment challenges in Africa. Built with cutting-edge AI technology and modern development practices.**
+JobMate is an AI-powered career development platform built to support young African professionals with career guidance, CV optimization, job matching, interview preparation, course suggestions, and subscription payments.
 
-## 👨‍💻 **My Contribution**
+## My Contribution
 
-I was responsible for implementing two critical backend features that form the foundation of the JobMate platform:
+Developed RESTful APIs using Go and Gin framework for authentication, interview practice, AI-powered career features, and payment workflows while applying Clean Architecture principles to improve maintainability.
 
-### 🎤 **Interview Practice System**
+- Designed MongoDB schemas for users, OTP verification, refresh tokens, interview sessions, job chats, CV data, and payment records.
+- Secured APIs by implementing JWT authentication, refresh token rotation, HTTP-only cookies, OAuth2 login, password hashing, and protected middleware.
+- Built OTP-based email verification and password reset flows using secure code hashing, expiry tracking, MongoDB persistence, and Brevo transactional email delivery.
+- Implemented AI-powered interview practice with freeform and structured modes, chat history, session management, and LLM-backed feedback.
+- Integrated Chapa payment gateway for subscription-based payments, including payment initialization, callback handling, verification, transaction persistence, and payment status tracking.
+- Added Groq as an AI fallback provider to improve reliability for CV chat, job search, and interview practice when the primary AI provider is unavailable.
+- Collaborated using Git-based workflows, focused backend testing, endpoint validation, deployment debugging, and production environment configuration.
 
-- **Designed and implemented** a comprehensive interview practice feature with dual modes:
-  - **Freeform Mode**: Conversational AI-powered interview coach allowing natural, open-ended practice sessions
-  - **Structured Mode**: Guided mock interviews with predefined question banks (general, technical, behavioral) and progress tracking
-- **AI Integration**: Integrated Groq LLM API with function-calling tools (`get_next_question`, `evaluate_answer`) to enable intelligent interview interactions
-- **Full CRUD Operations**: Built complete session management (create, read, update, complete) with MongoDB persistence
-- **Technical Implementation**:
-  - Implemented two-step AI flow: AI → tool calls → AI response for combining natural language with deterministic logic
-  - Created question bank system with session type categorization and progress tracking
-  - Built pagination support for chat history retrieval
-  - Designed MongoDB schema for interview sessions with embedded message arrays
+## Live Demo
 
-### 🔐 **Authentication & Security System**
+[Visit JobMate](https://jobmateaicareerbuddy.vercel.app)
 
-- **End-to-End Authentication**: Implemented complete authentication flow including registration, login, logout, and token refresh
-- **Email Verification**: Built OTP-based email verification system with:
-  - 6-digit code generation and secure bcrypt hashing
-  - SMTP email delivery with HTML-formatted verification emails
-  - Expiration and usage tracking to prevent replay attacks
-- **JWT Token Management**:
-  - Implemented access token (short-lived) and refresh token (long-lived) system
-  - Built token rotation mechanism with automatic revocation of old tokens
-  - Created HTTP-only cookie storage for refresh tokens
-- **OAuth2 Integration**: Implemented Google OAuth2 login with provider validation and account protection
-- **Security Features**:
-  - Password hashing with bcrypt and strength validation
-  - Auth middleware for JWT validation and user context injection
-  - Refresh token revocation on logout
-  - Provider matching to prevent account conflicts between OAuth and password-based users
+## Screenshots
 
-**Architecture**: Both features follow clean architecture principles with clear separation between delivery (controllers), use cases (business logic), domain (models/interfaces), and infrastructure (MongoDB, Groq, JWT, SMTP) layers.
+### Welcome Page
 
----
-## 📋 **Project Overview**
+![JobMate welcome page](docs/screenshots/HomePage.png)
 
-JobMate is a comprehensive AI-powered career development platform designed to address youth unemployment challenges across Africa. By leveraging Google Gemini AI, the platform provides personalized career guidance, CV optimization, intelligent job matching, and interview preparation to help young Africans bridge skill gaps and connect with global opportunities.
+### Dashboard
 
-**Key Benefits:**
-- Tackles Africa's youth unemployment crisis with AI-powered solutions
-- Provides personalized career guidance and skill development paths
-- Offers multilingual support (English & Amharic) for accessibility
-- Delivers seamless experience across web and mobile platforms
+![JobMate dashboard](docs/screenshots/Dashboard.png)
 
-## 📱 Application Screenshots
+### CV Studio
 
-### 🔐 Authentication Flow (Mobile App)
+![JobMate CV analysis](docs/screenshots/CvStudio.png)
 
-| Welcome Screen | Sign Up | Login | Dashboard |
-| -------------- | -------------- | -------------- | --------- |
-| ![Welcome](docs/screenshots/welcome-screen.png) | ![Sign Up](docs/screenshots/sign-up.png) | ![Login](docs/screenshots/login.png) | ![Dashboard](docs/screenshots/dashboard.png) |
+### Job Search
 
-### 📄 CV Management Features (Mobile App)
+![JobMate job search](docs/screenshots/JobSearch.png)
 
-| CV Upload Interface | CV Analysis Results |
-| ------------------- | ------------------- |
-| ![CV Upload](docs/screenshots/cv-upload.png) | ![CV Analysis](docs/screenshots/cv-analysis.png) |
+### Interview Practice
 
-### 🎤 Interview Preparation Suite (Mobile App)
+![JobMate interview practice](docs/screenshots/InterviewPractice.png)
 
-| Free-form Interview | Free-form Interview Chat | Structured Interview |
-| ------------------- | -------------- | -------------------- | 
-| ![Free-form Interview](docs/screenshots/freeform-interview.png) | ![Free-form Interview Chat](docs/screenshots/freeform-interview-chat.png) | ![Structured Interview](docs/screenshots/structured-interview.png) |
+### Pricing
 
-### 🔍 Job Search & AI Features (Mobile App)
+![JobMate pricing](docs/screenshots/Pricing.png)
 
-| Job Search Interface |
-| ------------ |
-| ![Job Search](docs/screenshots/job-search.png) |
+## Project Overview
 
-## ✨ **Key Features**
+JobMate helps users prepare for better career opportunities through:
 
-### 🤖 **AI-Powered Career Intelligence**
+- Personalized AI career guidance
+- CV and resume analysis
+- AI-powered job search and matching
+- Freeform and structured interview practice
+- Course suggestions based on skill gaps
+- English and Amharic language support
+- Chapa-powered subscription payments for Ethiopia
 
-- **Smart CV Analysis** - Advanced AI feedback on content, structure, and ATS optimization
-- **Intelligent Job Matching** - Skill-based ranking with personalized recommendations
-- **Interview Coaching** - Mock sessions with real-time feedback and cultural adaptation
-- **Career Path Planning** - Personalized roadmaps with skill gap analysis
-- **24/7 AI Assistant** - Conversational support in English and Amharic
+## Core Features
 
-### 📄 **CV Management System**
-- **Multi-format Upload** - Support for PDF, DOC, and image uploads
-- **Real-time Analysis** - Instant feedback and improvement suggestions
-- **ATS Optimization** - Resume optimization for Applicant Tracking Systems
-- **Version Control** - Track CV improvements and maintain multiple versions
+### AI Career Support
 
-### 🔍 **Job Discovery & Matching**
-- **Smart Search** - AI-powered job discovery with relevance scoring
-- **Skill-Based Ranking** - Jobs matched to user competencies and experience
-- **Application Tracking** - Monitor application status and follow-ups
-- **Salary Insights** - Market data for informed career decisions
-- **Remote Opportunities** - Focus on global remote work possibilities
+- CV analysis and improvement suggestions
+- Skill gap detection
+- Course recommendations
+- General career assistant chat
+- English and Amharic responses
 
-### 🎤 **Interview Preparation Suite**
-- **Free-form Interview Practice** - Open-ended AI-powered interview sessions with natural conversation
-- **Structured Interview Sessions** - Guided practice with specific question formats and categories
-- **Interactive Interview Chat** - Real-time AI feedback and conversation during practice sessions
-- **Cultural Adaptation** - Interview tips tailored to African and international contexts
-- **Performance Analytics** - Detailed feedback on responses and communication skills
+### Job Search
 
-### 🌐 **Multilingual & Cultural Support**
-- **English & Amharic** - Native language support with seamless switching
-- **Cultural Context** - Africa-focused career advice and market insights
-- **Local Job Markets** - Integration with African job boards and opportunities
-- **Community Features** - Connect with other job seekers and mentors
+- AI-assisted job search conversations
+- Role and skill extraction from user prompts
+- Matched job cards with external links
+- Saved job chat history
 
-## 🏗️ Architecture
+### Interview Practice
 
-### **Frontend (Flutter & Next.js)**
+- Freeform interview coaching
+- Structured interview sessions by field
+- AI feedback on answers
+- Interview history tracking
 
-```
-Flutter Mobile App           Next.js Web App
-├── features/                ├── app/
-│   ├── auth/               │   ├── login/
-│   ├── cv/                 │   ├── register/
-│   ├── interview/          │   ├── dashboard/
-│   └── job_search/         │   ├── cv/
-├── core/                   │   ├── interview/
-│   ├── network/            │   ├── chat/
-│   └── presentation/       │   └── reset-password/
-└── l10n/                   ├── components/
-    ├── app_localizations   │   └── ui/
-    └── multilingual        └── lib/
-```
+### Authentication
 
-### **Backend (Go)**
+- User registration and login
+- Email OTP verification
+- Password reset with OTP
+- JWT access tokens
+- Refresh token cookie flow
+- OAuth2 support
 
-```
-backend/
-├── cmd/                     # Application entry points
-├── internal/
-│   ├── domain/             # Business logic & entities
-│   ├── handlers/           # HTTP handlers
-│   ├── services/           # Business services
-│   └── repository/         # Data access layer
-├── pkg/                    # Shared packages
-└── configs/                # Configuration files
+### Payments
+
+- Chapa payment initialization
+- Payment verification
+- Callback handling
+- Payment records in MongoDB
+- Plan-based subscription flow
+
+## Tech Stack
+
+### Frontend
+
+- Next.js App Router
+- TypeScript
+- Tailwind CSS
+- Redux Toolkit Query
+- Framer Motion
+- next-themes
+
+### Backend
+
+- Go
+- Gin
+- MongoDB
+- JWT authentication
+- Google Gemini AI
+- Groq AI fallback
+- Brevo transactional email API
+- Chapa payment gateway
+
+## Project Structure
+
+```text
+JobMate
+├── Backend
+│   ├── delivery
+│   ├── domain
+│   ├── infrastructure
+│   ├── repositories
+│   └── usecases
+├── frontend
+│   ├── app
+│   ├── lib
+│   ├── providers
+│   └── public
+└── Mobile
 ```
 
+## Environment Variables
 
-## 🚀 Quick Start Guide
+### Backend
 
-### 📋 Prerequisites
+```env
+APP_ENV=production
+PORT=8080
+BASE_URL=https://your-backend-url.onrender.com
+BACKEND_URL=https://your-backend-url.onrender.com
+FRONTEND_URL=https://your-frontend-url.vercel.app
+ALLOWED_ORIGINS=https://your-frontend-url.vercel.app
 
-- **Flutter SDK** (3.7 or higher)
-- **Node.js** (18 or higher)
-- **Go** (1.21 or higher)
-- **MongoDB** (6.0 or higher - local installation or MongoDB Atlas)
-- **Google Gemini API Key** - For AI-powered features
-- **Development IDE** (VS Code, Android Studio, or IntelliJ)
+DB_URI=mongodb+srv://...
+DB_NAME=jobmate
 
-### ⚡ Fast Setup (5 Minutes)
+JWT_SECRET_KEY=your_jwt_secret
+JWT_EXPIRATION_MINUTES=60
+JWT_ACCESS_TOKEN_EXPIRY=60
+REFRESH_TOKEN_SECRET=your_refresh_secret
+REFRESH_TOKEN_EXPIRATION_MINUTES=10080
 
-#### 1. **Clone and Navigate**
+BREVO_API_KEY=your_brevo_api_key
+EMAIL_FROM=your_verified_sender_email
+EMAIL_FROM_NAME=JobMate
 
-```bash
-git clone https://github.com/your-organization/jobmate.git
-cd jobmate
+GEMINI_MODEL_NAME=gemini-1.5-flash
+GEMINI_API_KEY=your_gemini_key
+AI_PROVIDER=groq
+AI_MODEL_NAME=llama-3.1-8b-instant
+AI_API_BASE_URL=https://api.groq.com/openai/v1
+AI_API_KEY=your_groq_key
+AI_TEMPERATURE=0.3
+
+CHAPA_BASE_URL=https://api.chapa.co/v1
+CHAPA_SECRET_KEY=your_chapa_secret_key
 ```
 
-#### 2. **Backend Configuration**
+### Frontend
+
+```env
+NEXT_PUBLIC_API_URL=https://your-backend-url.onrender.com
+NEXT_PUBLIC_APP_ENV=production
+```
+
+## Local Development
+
+### Backend
 
 ```bash
 cd Backend
 go mod tidy
-
-# Create environment file
-cat > .env << EOF
-PORT=8080
-MONGODB_URI=mongodb://localhost:27017/jobmate
-GEMINI_API_KEY=your_gemini_api_key_here
-JWT_SECRET=your_super_secret_jwt_key_here
-GIN_MODE=release
-EOF
-
-# Start the server
-go run main.go
+go run ./delivery
 ```
 
-#### 3. **Web Frontend Setup**
+### Frontend
 
 ```bash
-cd ../frontend
+cd frontend
 npm install
-
-# Create environment file
-cat > .env.local << EOF
-NEXT_PUBLIC_API_URL=http://localhost:8080
-NEXT_PUBLIC_APP_ENV=development
-EOF
-
-# Start development server
 npm run dev
 ```
 
-#### 4. **Mobile App Setup**
+## Deployment
 
-```bash
-cd ../Mobile
-flutter pub get
+- Frontend: deployed on Vercel
+- Backend: deployed on Render
+- Database: MongoDB Atlas
+- Email delivery: Brevo transactional email API
+- Payments: Chapa
 
-# For Android emulator
-flutter run
+## Verification
 
-# For iOS simulator (macOS only)
-flutter run
-```
+The project has been validated through:
 
+- Backend package tests with `go test ./...`
+- Frontend linting with `npm run lint`
+- Frontend production build with `npm run build`
+- Manual endpoint validation for authentication, OTP, AI chat flows, job search, CV analysis, and Chapa payment flow
 
+## Impact
 
-## 💼 Professional Development Showcase
-
-### **🎯 Technical Skills Demonstrated**
-
-- **Mobile Development**: Flutter, Dart, BLoC, Material Design 3
-- **Web Development**: Next.js, React, TypeScript, Redux Toolkit, Tailwind CSS
-- **Backend Development**: Go, Gin, MongoDB, JWT Authentication, REST APIs
-- **AI/ML Integration**: Google Gemini API, natural language processing
-- **Database Design**: MongoDB schemas optimized for career data
-- **State Management**: BLoC pattern for Flutter and Redux for web
-- **Multilingual Support**: English and Amharic language implementations
-- **Modern UI/UX**: Material Design 3 with responsive components
-
-
-### **🎯 Key Achievements**
-
-- ✅ **AI-Powered CV Analysis**: Advanced document processing with actionable feedback
-- ✅ **Intelligent Job Matching**: Skill-based ranking with machine learning algorithms
-- ✅ **Multilingual Platform**: Native English and Amharic support with cultural context
-- ✅ **Multi-Platform Development**: Flutter mobile app and Next.js web application
-- ✅ **Scalable Backend**: Go-based REST API with clean architecture
-- ✅ **Real-World Impact**: Addresses Africa's youth unemployment crisis with innovative solutions
-  
----
-
-<p align="center">
-  <strong>🌍 Building a brighter future for African youth, one career at a time.</strong>
-</p>
-
-<p align="center">
-  Made with ❤️ for Africa by Africans
-</p>
-
----
-
-**⭐ Star this repository if you find it helpful and want to support African tech innovation!**
-
-**JobMate represents a complete AI-powered career guidance solution built with modern technologies and best practices. The platform successfully demonstrates full-stack development capabilities while providing real impact for African youth facing unemployment challenges.**
+JobMate is built to help young African professionals access practical career guidance, improve their CVs, prepare for interviews, discover relevant jobs, and move toward stronger local and global career opportunities.
