@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import ThemeToggle from "../ThemeToggle";
 import { AfricaMapSVG } from "../svg/AfricaMapSVG";
 import LanguageSelector from "../LanguageSelector";
+import { TiltSurface } from "./motion";
 
 const navItems = [
   { href: "/dashboard", labelKey: "nav_dashboard", icon: LayoutDashboard },
@@ -209,7 +210,10 @@ export function AppShell({
           </div>
         </header>
 
-        <main className="mx-auto max-w-6xl px-4 py-10 md:px-8 md:py-14">
+        <main
+          key={pathname}
+          className="page-enter mx-auto max-w-6xl px-4 py-10 md:px-8 md:py-14"
+        >
           {(title || description || actions) && (
             <div className="mb-10 flex flex-col gap-5 border-b border-[var(--border)] pb-8 sm:flex-row sm:items-start sm:justify-between">
               <div className="max-w-2xl">
@@ -242,7 +246,11 @@ export function Surface({
   children: React.ReactNode;
   className?: string;
 }) {
-  return <section className={cn("panel p-5 md:p-6", className)}>{children}</section>;
+  return (
+    <TiltSurface as="section" className={cn("panel p-5 md:p-6", className)}>
+      {children}
+    </TiltSurface>
+  );
 }
 
 export function PrimaryLink({

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useSelector } from "react-redux";
 import { ArrowRight, BookOpen, Briefcase, FileText, Lightbulb, MessageCircle, Mic } from "lucide-react";
 import { AppShell } from "../components/modern/AppShell";
+import { Stagger, StaggerItem, TiltSurface } from "../components/modern/motion";
 import type { RootState } from "@/lib/redux/store";
 import { useLanguage } from "@/providers/language-provider";
 
@@ -63,38 +64,41 @@ export default function Dashboard() {
       title={t("dashboard_welcome").replace("{name}", name)}
       description={t("dashboard_description")}
     >
-      <div className="grid gap-px overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--border)] md:grid-cols-2">
+      <Stagger className="grid gap-px overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--border)] md:grid-cols-2">
         {featureLinks.map((feature) => {
           const Icon = feature.icon;
           return (
-            <Link
-              key={feature.titleKey}
-              href={feature.href}
-              className="group flex items-start gap-4 bg-[var(--bg-surface)] p-5 transition-colors hover:bg-[var(--bg-surface-hover)]"
-            >
-              <span className="icon-box">
-                <Icon className="size-4" />
-              </span>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-3">
-                  <h2 className="text-sm font-semibold">
-                    {t(feature.titleKey)}
-                  </h2>
-                  <ArrowRight className="size-4 shrink-0 text-[var(--text-muted)] transition-transform group-hover:translate-x-0.5" />
-                </div>
-                <p className="mt-1 text-sm leading-6 text-[var(--text-muted)]">
-                  {t(feature.descriptionKey)}
-                </p>
-                <p className="mt-2 text-xs font-medium text-[var(--accent)]">
-                  {t(feature.statKey)}
-                </p>
-              </div>
-            </Link>
+            <StaggerItem key={feature.titleKey} className="h-full">
+              <TiltSurface className="h-full bg-[var(--bg-surface)]">
+                <Link
+                  href={feature.href}
+                  className="group flex h-full items-start gap-4 p-5 transition-colors hover:bg-[var(--bg-surface-hover)]"
+                >
+                  <span className="icon-box">
+                    <Icon className="size-4" />
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center justify-between gap-3">
+                      <h2 className="text-sm font-semibold">
+                        {t(feature.titleKey)}
+                      </h2>
+                      <ArrowRight className="size-4 shrink-0 text-[var(--text-muted)] transition-transform group-hover:translate-x-0.5" />
+                    </div>
+                    <p className="mt-1 text-sm leading-6 text-[var(--text-muted)]">
+                      {t(feature.descriptionKey)}
+                    </p>
+                    <p className="mt-2 text-xs font-medium text-[var(--accent)]">
+                      {t(feature.statKey)}
+                    </p>
+                  </div>
+                </Link>
+              </TiltSurface>
+            </StaggerItem>
           );
         })}
-      </div>
+      </Stagger>
 
-      <div className="card mt-6 flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between">
+      <TiltSurface as="section" className="card mt-6 flex flex-col gap-4 p-6 md:flex-row md:items-center md:justify-between">
         <div className="max-w-2xl">
           <h2 className="text-base font-semibold">{t("dashboard_flow_title")}</h2>
           <p className="mt-1 text-sm leading-6 text-[var(--text-muted)]">
@@ -105,7 +109,7 @@ export default function Dashboard() {
           {t("dashboard_flow_cta")}
           <ArrowRight className="size-4" />
         </Link>
-      </div>
+      </TiltSurface>
     </AppShell>
   );
 }

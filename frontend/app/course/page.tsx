@@ -8,6 +8,7 @@ import {
   EmptyState,
   Surface,
 } from "../components/modern/AppShell";
+import { Stagger, StaggerItem, TiltSurface } from "../components/modern/motion";
 import { useLanguage } from "@/providers/language-provider";
 
 type Course = {
@@ -113,45 +114,47 @@ export default function Page() {
             </button>
           </EmptyState>
         ) : courses.length ? (
-          <div className="grid gap-4 md:grid-cols-2">
+          <Stagger className="grid gap-4 md:grid-cols-2">
             {courses.map((course, index) => (
-              <article
-                key={`${course.Title || "course"}-${index}`}
-                className="flex flex-col rounded-md border border-[var(--border)] bg-[var(--bg-surface)] p-5"
-              >
-                <div className="flex items-start justify-between gap-4">
-                  <span className="icon-box">
-                    <BookOpen className="size-4" />
-                  </span>
-                  {course.URL && (
-                    <a
-                      href={course.URL}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="btn-secondary btn-sm"
-                    >
-                      {c.open}
-                      <ExternalLink className="size-3" />
-                    </a>
-                  )}
-                </div>
-                <h2 className="mt-4 text-sm font-semibold leading-6">
-                  {course.Title || c.recommended}
-                </h2>
-                <p className="mt-1 text-sm text-[var(--accent)]">
-                  {course.Provider || c.provider}
-                </p>
-                {course.Skill && (
-                  <p className="mt-3 inline-flex w-fit rounded border border-[var(--accent-border)] bg-[var(--accent-subtle)] px-2 py-0.5 text-xs font-medium text-[var(--accent)]">
-                    {c.skill}: {course.Skill}
+              <StaggerItem key={`${course.Title || "course"}-${index}`}>
+                <TiltSurface
+                  as="article"
+                  className="flex h-full flex-col rounded-md border border-[var(--border)] bg-[var(--bg-surface)] p-5"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <span className="icon-box">
+                      <BookOpen className="size-4" />
+                    </span>
+                    {course.URL && (
+                      <a
+                        href={course.URL}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="btn-secondary btn-sm"
+                      >
+                        {c.open}
+                        <ExternalLink className="size-3" />
+                      </a>
+                    )}
+                  </div>
+                  <h2 className="mt-4 text-sm font-semibold leading-6">
+                    {course.Title || c.recommended}
+                  </h2>
+                  <p className="mt-1 text-sm text-[var(--accent)]">
+                    {course.Provider || c.provider}
                   </p>
-                )}
-                <p className="mt-3 text-sm leading-6 text-[var(--text-muted)]">
-                  {course.Description || c.noDescription}
-                </p>
-              </article>
+                  {course.Skill && (
+                    <p className="mt-3 inline-flex w-fit rounded border border-[var(--accent-border)] bg-[var(--accent-subtle)] px-2 py-0.5 text-xs font-medium text-[var(--accent)]">
+                      {c.skill}: {course.Skill}
+                    </p>
+                  )}
+                  <p className="mt-3 text-sm leading-6 text-[var(--text-muted)]">
+                    {course.Description || c.noDescription}
+                  </p>
+                </TiltSurface>
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
         ) : (
           <EmptyState title={c.emptyTitle} description={c.emptyDesc} />
         )}

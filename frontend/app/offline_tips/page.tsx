@@ -12,6 +12,7 @@ import {
 import { useLanguage } from "@/providers/language-provider";
 import { tips } from "../components/offline_tips/tips";
 import { AppShell, Surface } from "../components/modern/AppShell";
+import { Stagger, StaggerItem, TiltSurface } from "../components/modern/motion";
 import { cn } from "@/lib/utils";
 
 const tabs = [
@@ -68,21 +69,24 @@ export default function Offline() {
           <p className="eyebrow">Active guide</p>
           <h2 className="mt-2 text-xl font-semibold tracking-tight">{title}</h2>
 
-          <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <Stagger className="mt-6 grid gap-4 md:grid-cols-2">
             {list.map((tip: string, index: number) => (
-              <article
-                key={`${tip}-${index}`}
-                className="rounded-md border border-[var(--border)] bg-[var(--bg-subtle)] p-5"
-              >
-                <span className="text-xs font-semibold uppercase tracking-wider text-[var(--accent)]">
-                  Tip {index + 1}
-                </span>
-                <p className="mt-2.5 text-sm leading-6 text-[var(--text-muted)]">
-                  {tip}
-                </p>
-              </article>
+              <StaggerItem key={`${tip}-${index}`}>
+                <TiltSurface
+                  as="article"
+                  maxTilt={2}
+                  className="h-full rounded-md border border-[var(--border)] bg-[var(--bg-subtle)] p-5"
+                >
+                  <span className="text-xs font-semibold uppercase tracking-wider text-[var(--accent)]">
+                    Tip {index + 1}
+                  </span>
+                  <p className="mt-2.5 text-sm leading-6 text-[var(--text-muted)]">
+                    {tip}
+                  </p>
+                </TiltSurface>
+              </StaggerItem>
             ))}
-          </div>
+          </Stagger>
 
           {proTip.length > 0 && (
             <div className="mt-5 rounded-md border border-[var(--accent-border)] bg-[var(--accent-subtle)] p-5">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Loader2, MessageCircle, Send } from "lucide-react";
@@ -115,8 +116,11 @@ export default function GeneralPage() {
 
         <div className="chat-panel h-[560px]">
           {messages.map((message, index) => (
-            <div
+            <motion.div
               key={`${message.role}-${index}`}
+              initial={{ opacity: 0, y: 10, scale: 0.985 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
               className={message.role === "user" ? "chat-user" : "chat-assistant"}
             >
               <div className="markdown-body text-sm">
@@ -124,7 +128,7 @@ export default function GeneralPage() {
                   {message.content}
                 </ReactMarkdown>
               </div>
-            </div>
+            </motion.div>
           ))}
         </div>
 

@@ -48,7 +48,7 @@ function PaymentSuccessContent() {
     status === "failed" ? "text-[var(--danger)]" : "text-[var(--accent)]";
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[var(--bg-base)] px-4 py-16 text-[var(--text-primary)]">
+    <main className="page-enter flex min-h-screen items-center justify-center bg-[var(--bg-base)] px-4 py-16 text-[var(--text-primary)]">
       <section className="card mx-auto w-full max-w-md p-8 text-center">
         <Icon className={`mx-auto size-10 ${iconColor} ${status === "checking" ? "animate-spin" : ""}`} />
         <h1 className="mt-4 text-xl font-semibold tracking-tight">
