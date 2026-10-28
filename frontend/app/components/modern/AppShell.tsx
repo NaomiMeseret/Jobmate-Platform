@@ -3,20 +3,18 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useSelector } from "react-redux";
-import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import {
   BookOpen,
   Briefcase,
+  CreditCard,
   FileText,
   LayoutDashboard,
+  Lightbulb,
   LogOut,
   Menu,
   MessageCircle,
   Mic,
-  PanelLeftClose,
-  CreditCard,
-  Sparkles,
   X,
 } from "lucide-react";
 import { useLanguage } from "@/providers/language-provider";
@@ -34,23 +32,22 @@ const navItems = [
   { href: "/interview", labelKey: "nav_interview", icon: Mic },
   { href: "/course", labelKey: "nav_courses", icon: BookOpen },
   { href: "/pricing", labelKey: "nav_pricing", icon: CreditCard },
-  { href: "/offline_tips", labelKey: "nav_tips", icon: Sparkles },
+  { href: "/offline_tips", labelKey: "nav_tips", icon: Lightbulb },
 ];
 
 export function BrandMark({ compact = false }: { compact?: boolean }) {
   return (
-    <Link href="/" className="group flex items-center gap-3">
-      <span className="grid size-11 place-items-center rounded-lg border border-[var(--border-accent)] bg-[var(--bg-surface)] text-[var(--accent-gold)] shadow-[0_18px_50px_var(--glow-gold)] backdrop-blur-xl transition group-hover:-translate-y-0.5">
-        <AfricaMapSVG className="h-6 w-6" />
+    <Link href="/" className="group flex items-center gap-2.5">
+      <span className="grid size-8 shrink-0 place-items-center bg-[var(--bg-ink)] text-[var(--text-on-ink)] transition-colors group-hover:bg-[var(--accent)] group-hover:text-[var(--accent-contrast)]">
+        <AfricaMapSVG className="h-[18px] w-[18px]" />
       </span>
       {!compact && (
-        <span className="leading-tight">
-          <span className="block font-display text-2xl font-semibold tracking-normal">
-            <span className="text-[var(--text-primary)]">Job</span>
-            <span className="text-[var(--accent-gold)]">Mate</span>
+        <span className="flex flex-col leading-none">
+          <span className="display text-[17px] font-semibold tracking-tight">
+            JobMate
           </span>
-          <span className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--text-muted)]">
-            AI career companion
+          <span className="kicker mt-0.5 text-[9px] tracking-[0.2em]">
+            Career Studio
           </span>
         </span>
       )}
@@ -75,45 +72,48 @@ export function AppShell({
   const logout = useLogout();
   const { t } = useLanguage();
   const user = useSelector((state: RootState) => state.auth.user);
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [menuOpen, setMenuOpen] = useState(false);
 
+  // Close the mobile drawer whenever the route changes.
   useEffect(() => {
-    if (window.innerWidth < 1024) {
-      setSidebarOpen(false);
-    }
+    setMenuOpen(false);
   }, [pathname]);
 
   return (
-    <div className="min-h-screen text-[var(--text-primary)]">
-      {sidebarOpen && (
+    <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)]">
+      {menuOpen && (
         <button
           type="button"
           aria-label="Close navigation"
-          onClick={() => setSidebarOpen(false)}
-          className="fixed inset-0 z-30 bg-black/45 backdrop-blur-sm lg:hidden"
+          onClick={() => setMenuOpen(false)}
+          className="fixed inset-0 z-30 bg-[var(--bg-ink)]/40 lg:hidden"
         />
       )}
 
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-72 flex-col border-r border-[var(--border)] bg-[rgba(var(--bg-base-rgb),0.9)] px-4 py-5 shadow-[24px_0_80px_rgba(0,0,0,0.28)] backdrop-blur-2xl transition-transform duration-300 ease-out",
-          sidebarOpen ? "translate-x-0" : "-translate-x-full"
+          "fixed inset-y-0 left-0 z-40 flex w-[248px] flex-col border-r border-[var(--border)] bg-[var(--bg-surface)] transition-transform duration-300 ease-out lg:translate-x-0",
+          menuOpen ? "translate-x-0" : "-translate-x-full"
         )}
       >
-        <div className="relative pr-12">
+        <div className="flex h-16 items-center justify-between border-b border-[var(--border)] px-5">
           <BrandMark />
           <button
             type="button"
             aria-label="Close sidebar"
-            onClick={() => setSidebarOpen(false)}
-            className="absolute right-0 top-0 inline-flex size-10 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-muted)] transition hover:border-[var(--border-accent)] hover:text-[var(--accent-gold)]"
+            onClick={() => setMenuOpen(false)}
+            className="btn-ghost btn-sm -mr-1 size-8 !px-0 lg:hidden"
           >
-            <PanelLeftClose className="hidden size-4 sm:block" />
-            <X className="size-4 sm:hidden" />
+            <X className="size-4" />
           </button>
         </div>
-        <nav className="mt-8 space-y-1">
-          {navItems.map((item) => {
+
+        <div className="border-b border-[var(--border)] px-5 py-3">
+          <p className="kicker">Workspace</p>
+        </div>
+
+        <nav className="flex-1 overflow-y-auto p-3">
+          {navItems.map((item, index) => {
             const active =
               pathname === item.href ||
               (item.href !== "/dashboard" && pathname.startsWith(item.href));
@@ -122,41 +122,52 @@ export function AppShell({
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={() => {
-                  if (window.innerWidth < 1024) setSidebarOpen(false);
-                }}
                 className={cn(
-                  "group flex items-center gap-3 rounded-lg border px-3 py-2.5 text-sm font-medium transition",
+                  "group flex items-center gap-3 px-3 py-2.5 text-sm transition-colors",
                   active
-                    ? "border-[var(--border-accent)] bg-[var(--glow-gold)] text-[var(--accent-gold)] shadow-[0_12px_32px_var(--glow-gold)]"
-                    : "border-transparent text-[var(--text-muted)] hover:border-[var(--border)] hover:bg-[var(--bg-surface-hover)] hover:text-[var(--text-primary)]"
+                    ? "bg-[var(--bg-ink)] font-medium text-[var(--text-on-ink)]"
+                    : "text-[var(--text-muted)] hover:bg-[var(--bg-surface-hover)] hover:text-[var(--text-primary)]"
                 )}
+                aria-current={active ? "page" : undefined}
               >
-                <Icon className="size-4 transition group-hover:scale-110" />
-                {t(item.labelKey)}
+                <span
+                  className={cn(
+                    "w-4 font-mono text-[10px] tabular-nums",
+                    active
+                      ? "text-[var(--accent)]"
+                      : "text-[var(--border-strong)]"
+                  )}
+                >
+                  {String(index + 1).padStart(2, "0")}
+                </span>
+                <Icon className="size-4 shrink-0" />
+                <span className="flex-1">{t(item.labelKey)}</span>
+                {active && (
+                  <span className="h-1.5 w-1.5 bg-[var(--accent)]" aria-hidden="true" />
+                )}
               </Link>
             );
           })}
         </nav>
 
-        <div className="mt-auto border-t border-[var(--border)] pt-4">
-          <div className="flex items-center gap-3 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] p-3">
-            <span className="grid size-10 shrink-0 place-items-center rounded-lg bg-[var(--glow-green)] text-sm font-semibold text-[var(--accent-green)]">
+        <div className="border-t border-[var(--border)] p-4">
+          <div className="flex items-center gap-3">
+            <span className="grid size-8 shrink-0 place-items-center bg-[var(--accent-subtle)] font-mono text-xs font-semibold text-[var(--accent)]">
               {(user?.firstName || user?.email || "J").charAt(0).toUpperCase()}
             </span>
             <div className="min-w-0 flex-1">
-              <p className="text-xs font-medium uppercase tracking-[0.14em] text-[var(--text-muted)]">
-                {t("signed_in")}
-              </p>
-              <p className="truncate text-sm font-semibold text-[var(--text-primary)]">
+              <p className="truncate text-sm font-medium">
                 {user?.firstName || user?.email || "JobMate user"}
+              </p>
+              <p className="kicker truncate text-[9px]">
+                {t("signed_in")}
               </p>
             </div>
             <button
               type="button"
               onClick={logout}
               aria-label="Sign out"
-              className="inline-flex size-10 shrink-0 items-center justify-center rounded-lg border border-red-400/25 bg-red-500/10 text-red-400 transition hover:bg-red-500/15"
+              className="btn-ghost btn-sm size-8 !px-0 text-[var(--danger)] hover:text-[var(--danger)]"
             >
               <LogOut className="size-4" />
             </button>
@@ -164,47 +175,30 @@ export function AppShell({
         </div>
       </aside>
 
-      <div
-        className={cn(
-          "transition-[padding] duration-300 ease-out",
-          sidebarOpen ? "lg:pl-72" : "lg:pl-0"
-        )}
-      >
-        <header className="sticky top-0 z-20 border-b border-[var(--border)] bg-[rgba(var(--bg-base-rgb),0.82)] px-4 py-3 backdrop-blur-2xl md:px-8">
-          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
-            {!sidebarOpen && (
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  aria-label="Open sidebar"
-                  aria-expanded={sidebarOpen}
-                  onClick={() => setSidebarOpen(true)}
-                  className="inline-flex size-10 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] text-[var(--text-primary)] shadow-sm backdrop-blur-xl transition hover:border-[var(--border-accent)] hover:text-[var(--accent-gold)]"
-                >
-                  <Menu className="size-4" />
-                </button>
-                <BrandMark compact />
-              </div>
-            )}
-            <nav className="hidden flex-1 items-center justify-center gap-1 md:flex lg:hidden">
-              {navItems.slice(0, 4).map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-[var(--text-muted)] transition hover:bg-[var(--bg-surface-hover)] hover:text-[var(--text-primary)]"
-                  >
-                    <Icon className="size-4" />
-                    {t(item.labelKey)}
-                  </Link>
-                );
-              })}
-            </nav>
+      <div className="lg:pl-[248px]">
+        <header className="sticky top-0 z-20 border-b border-[var(--border)] bg-[var(--bg-base)]/95 backdrop-blur">
+          <div className="flex h-16 items-center gap-3 px-4 md:px-8">
+            <button
+              type="button"
+              aria-label="Open navigation"
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen(true)}
+              className="btn-ghost size-9 !px-0 lg:hidden"
+            >
+              <Menu className="size-5" />
+            </button>
+            <div className="lg:hidden">
+              <BrandMark compact />
+            </div>
+
+            <p className="kicker hidden lg:block">
+              {eyebrow || t("appSubtitle")}
+            </p>
+
             <div className="ml-auto flex items-center gap-2">
               <Link
                 href="/chat/general"
-                className="cta-glow hidden h-10 items-center gap-2 rounded-lg border border-[var(--border-accent)] bg-[var(--accent-gold)] px-4 text-sm font-semibold text-[#080c18] shadow-sm transition hover:scale-[1.02] sm:inline-flex"
+                className="btn-secondary btn-sm hidden sm:inline-flex"
               >
                 <MessageCircle className="size-4" />
                 {t("ask_jobmate")}
@@ -215,33 +209,24 @@ export function AppShell({
           </div>
         </header>
 
-        <main className="mx-auto max-w-7xl px-4 py-8 md:px-8">
+        <main className="mx-auto max-w-6xl px-4 py-10 md:px-8 md:py-14">
           {(title || description || actions) && (
-            <motion.section
-              className="mb-8 flex flex-col gap-5 md:flex-row md:items-end md:justify-between"
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
-            >
-              <div className="max-w-3xl">
-                {eyebrow && (
-                  <p className="text-xs font-medium uppercase tracking-[0.18em] text-[var(--accent-green)]">
-                    {eyebrow}
-                  </p>
-                )}
+            <div className="mb-10 flex flex-col gap-5 border-b border-[var(--border)] pb-8 sm:flex-row sm:items-start sm:justify-between">
+              <div className="max-w-2xl">
+                {eyebrow && <p className="kicker-accent">{eyebrow}</p>}
                 {title && (
-                  <h1 className="gradient-text mt-2 font-display text-[clamp(2.7rem,5vw,5rem)] font-semibold leading-[0.95] tracking-[-0.03em]">
-                    {title}
-                  </h1>
+                  <h1 className="display mt-3 text-3xl md:text-4xl">{title}</h1>
                 )}
                 {description && (
-                  <p className="mt-4 max-w-3xl text-lg leading-8 text-[var(--text-muted)]">
+                  <p className="mt-3 text-sm leading-6 text-[var(--text-muted)] md:text-base">
                     {description}
                   </p>
                 )}
               </div>
-              {actions && <div className="flex flex-wrap gap-2">{actions}</div>}
-            </motion.section>
+              {actions && (
+                <div className="flex shrink-0 flex-wrap gap-2">{actions}</div>
+              )}
+            </div>
           )}
           {children}
         </main>
@@ -257,14 +242,7 @@ export function Surface({
   children: React.ReactNode;
   className?: string;
 }) {
-  return (
-    <section
-      className={cn("glass-card p-5 text-[var(--text-primary)]", className)}
-    >
-      <div className="glass-reflection opacity-70" />
-      <div className="relative z-10">{children}</div>
-    </section>
-  );
+  return <section className={cn("panel p-5 md:p-6", className)}>{children}</section>;
 }
 
 export function PrimaryLink({
@@ -277,13 +255,7 @@ export function PrimaryLink({
   className?: string;
 }) {
   return (
-    <Link
-      href={href}
-      className={cn(
-        "inline-flex h-11 items-center justify-center gap-2 rounded-lg border border-[var(--border-accent)] bg-[var(--accent-gold)] px-5 text-sm font-semibold text-[#080c18] shadow-[0_18px_50px_var(--glow-gold)] transition hover:-translate-y-0.5",
-        className
-      )}
-    >
+    <Link href={href} className={cn("btn-primary", className)}>
       {children}
     </Link>
   );
@@ -299,14 +271,42 @@ export function EmptyState({
   children?: React.ReactNode;
 }) {
   return (
-    <div className="rounded-lg border border-dashed border-[var(--border-accent)] bg-[var(--bg-surface)] p-8 text-center">
-      <h3 className="font-display text-2xl font-semibold text-[var(--text-primary)]">
-        {title}
-      </h3>
-      <p className="mx-auto mt-2 max-w-xl text-base leading-7 text-[var(--text-muted)]">
+    <div className="border border-dashed border-[var(--border-strong)] px-6 py-12 text-center">
+      <p className="kicker">Empty</p>
+      <h3 className="display mt-2 text-lg">{title}</h3>
+      <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-[var(--text-muted)]">
         {description}
       </p>
       {children && <div className="mt-5">{children}</div>}
+    </div>
+  );
+}
+
+export function SectionHeader({
+  icon,
+  title,
+  description,
+  action,
+}: {
+  icon?: React.ReactNode;
+  title: string;
+  description?: string;
+  action?: React.ReactNode;
+}) {
+  return (
+    <div className="mb-6 flex items-start justify-between gap-4 border-b border-[var(--border)] pb-4">
+      <div className="flex items-start gap-3">
+        {icon && <span className="icon-box">{icon}</span>}
+        <div>
+          <h2 className="display text-xl">{title}</h2>
+          {description && (
+            <p className="mt-1.5 text-sm leading-5 text-[var(--text-muted)]">
+              {description}
+            </p>
+          )}
+        </div>
+      </div>
+      {action && <div className="shrink-0">{action}</div>}
     </div>
   );
 }
