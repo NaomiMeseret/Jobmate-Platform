@@ -90,9 +90,7 @@ export default function LoginForm() {
             {error && <AuthError>{error}</AuthError>}
 
             <label className="block">
-              <span className="mb-1.5 block text-sm font-medium text-[var(--text-primary)]">
-                {t("email")}
-              </span>
+              <span className="field-label">{t("email")}</span>
               <span className="relative block">
                 <Mail className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--text-muted)]" />
                 <input
@@ -107,9 +105,7 @@ export default function LoginForm() {
             </label>
 
             <label className="block">
-              <span className="mb-1.5 block text-sm font-medium text-[var(--text-primary)]">
-                {t("password")}
-              </span>
+              <span className="field-label">{t("password")}</span>
               <span className="relative block">
                 <Lock className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-[var(--text-muted)]" />
                 <input
@@ -126,7 +122,7 @@ export default function LoginForm() {
             <button
               type="button"
               onClick={() => setShowForgotPassword(true)}
-              className="text-sm font-medium text-[var(--accent-green)] hover:underline"
+              className="text-sm font-medium text-[var(--accent)] hover:underline"
             >
               {t("l_forgotPassword") || "Forgot password?"}
             </button>
@@ -138,7 +134,7 @@ export default function LoginForm() {
 
           <div className="my-5 flex items-center gap-3">
             <span className="h-px flex-1 bg-[var(--border)]" />
-            <span className="text-xs font-medium uppercase text-[var(--text-muted)]">
+            <span className="text-xs font-medium uppercase tracking-wider text-[var(--text-muted)]">
               or
             </span>
             <span className="h-px flex-1 bg-[var(--border)]" />
@@ -148,7 +144,7 @@ export default function LoginForm() {
 
           <p className="mt-5 text-center text-sm text-[var(--text-muted)]">
             {t("l_noAccount")}{" "}
-            <Link href="/register" className="font-medium text-[var(--accent-green)]">
+            <Link href="/register" className="font-medium text-[var(--accent)]">
               {t("l_register")}
             </Link>
           </p>
