@@ -6,7 +6,7 @@ import { Button } from "../components/ui/Button";
 const ErrorPage = () => {
   const router = useRouter();
   return (
-    <main className="flex min-h-screen items-center justify-center bg-[var(--bg-base)] px-4 text-[var(--text-primary)]">
+    <main className="page-enter flex min-h-screen items-center justify-center bg-[var(--bg-base)] px-4 text-[var(--text-primary)]">
       <div className="w-full max-w-xl border-t border-[var(--border-strong)] pt-8 text-center">
         <p className="kicker-accent">Error 404</p>
         <h1 className="display mt-4 text-6xl md:text-7xl">Page not found</h1>

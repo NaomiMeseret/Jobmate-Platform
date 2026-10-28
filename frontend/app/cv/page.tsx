@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { motion } from "framer-motion";
 import Link from "next/link";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -486,8 +487,11 @@ export default function CvPage() {
                     </p>
                   )}
                   {historyMessages.map((message, index) => (
-                    <div
+                    <motion.div
                       key={`${message.timestamp || index}-${index}`}
+                      initial={{ opacity: 0, y: 10, scale: 0.985 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
                       className={
                         message.role === "user" ? "chat-user" : "chat-assistant"
                       }
@@ -497,7 +501,7 @@ export default function CvPage() {
                           {message.content}
                         </ReactMarkdown>
                       </div>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
 

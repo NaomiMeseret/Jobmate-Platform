@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { motion } from "framer-motion";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import {
@@ -22,6 +23,7 @@ import {
   SectionHeader,
   Surface,
 } from "@/app/components/modern/AppShell";
+import { TiltSurface } from "@/app/components/modern/motion";
 import { useLanguage } from "@/providers/language-provider";
 
 type Job = {
@@ -283,8 +285,11 @@ export default function JobSearch() {
 
           <div className="chat-panel h-[520px]">
             {visibleMessages.map((message, index) => (
-              <div
+              <motion.div
                 key={`${message.role}-${index}`}
+                initial={{ opacity: 0, y: 10, scale: 0.985 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
                 className={
                   message.role === "user"
                     ? "chat-user"
@@ -303,8 +308,10 @@ export default function JobSearch() {
                       {message.jobs.length === 1 ? "role" : "roles"}
                     </p>
                     {message.jobs.map((job, jobIndex) => (
-                      <article
+                      <TiltSurface
+                        as="article"
                         key={`${job.title}-${jobIndex}`}
+                        maxTilt={2}
                         className="rounded-md border border-[var(--border)] bg-[var(--bg-surface)] p-4"
                       >
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
@@ -352,11 +359,11 @@ export default function JobSearch() {
                             </span>
                           ))}
                         </div>
-                      </article>
+                      </TiltSurface>
                     ))}
                   </div>
                 ) : null}
-              </div>
+              </motion.div>
             ))}
           </div>
 

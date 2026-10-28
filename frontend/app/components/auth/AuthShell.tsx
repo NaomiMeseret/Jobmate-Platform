@@ -8,7 +8,7 @@ import LanguageSelector from "../LanguageSelector";
 
 export function AuthPageShell({ children }: { children: ReactNode }) {
   return (
-    <main className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)]">
+    <main className="page-enter min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)]">
       <div className="border-b border-[var(--border)]">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 md:px-8">
           <Link href="/" className="flex items-center gap-2.5">

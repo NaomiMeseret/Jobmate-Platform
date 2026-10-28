@@ -1,8 +1,14 @@
 "use client";
 
-import { motion, useInView, useReducedMotion } from "framer-motion";
+import {
+  motion,
+  useInView,
+  useMotionValue,
+  useReducedMotion,
+  useSpring,
+} from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import type { ReactNode } from "react";
+import type { PointerEvent, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /**
@@ -13,21 +19,62 @@ import { cn } from "@/lib/utils";
  * happening. Motion that is reduced-motion aware is disabled entirely.
  */
 
+function useSweepVisibility() {
+  const ref = useRef<HTMLDivElement>(null);
+  const inView = useInView(ref, { once: true, margin: "-80px" });
+  const [crossed, setCrossed] = useState(false);
+
+  useEffect(() => {
+    let previousY = window.scrollY;
+
+    const revealCrossedContent = () => {
+      const currentY = window.scrollY;
+      const element = ref.current;
+      if (element) {
+        const bounds = element.getBoundingClientRect();
+        const documentTop = bounds.top + currentY;
+        const documentBottom = bounds.bottom + currentY;
+        const sweptTop = Math.min(previousY, currentY) - window.innerHeight;
+        const sweptBottom = Math.max(previousY, currentY) + window.innerHeight;
+
+        // If a large jump crosses an element between scroll events, reveal it
+        // anyway; hidden page content is never allowed to remain inaccessible.
+        if (documentBottom >= sweptTop && documentTop <= sweptBottom) {
+          setCrossed(true);
+        }
+      }
+      previousY = currentY;
+    };
+
+    window.addEventListener("scroll", revealCrossedContent, { passive: true });
+    window.addEventListener("hashchange", revealCrossedContent);
+    window.addEventListener("resize", revealCrossedContent);
+    revealCrossedContent();
+
+    return () => {
+      window.removeEventListener("scroll", revealCrossedContent);
+      window.removeEventListener("hashchange", revealCrossedContent);
+      window.removeEventListener("resize", revealCrossedContent);
+    };
+  }, []);
+
+  return { ref, visible: inView || crossed };
+}
+
 export function Reveal({
   children,
   delay = 0,
   y = 16,
   className,
-  as = "div",
 }: {
   children: ReactNode;
   delay?: number;
   y?: number;
   className?: string;
-  as?: "div" | "section" | "li" | "article";
 }) {
   const reduce = useReducedMotion();
-  const MotionTag = motion[as];
+  const MotionTag = motion.div;
+  const { ref, visible } = useSweepVisibility();
 
   if (reduce) {
     return <MotionTag className={className}>{children}</MotionTag>;
@@ -35,9 +82,10 @@ export function Reveal({
 
   return (
     <MotionTag
+      ref={ref}
       className={className}
       initial={{ opacity: 0, y }}
-      whileInView={{ opacity: 1, y: 0 }}
+      animate={visible ? { opacity: 1, y: 0 } : undefined}
       viewport={{ once: true, margin: "-80px" }}
       transition={{ duration: 0.55, delay, ease: [0.22, 1, 0.36, 1] }}
     >
@@ -56,6 +104,7 @@ export function Stagger({
   gap?: number;
 }) {
   const reduce = useReducedMotion();
+  const { ref, visible } = useSweepVisibility();
 
   if (reduce) {
     return <div className={className}>{children}</div>;
@@ -63,9 +112,10 @@ export function Stagger({
 
   return (
     <motion.div
+      ref={ref}
       className={className}
       initial="hidden"
-      whileInView="visible"
+      animate={visible ? "visible" : undefined}
       viewport={{ once: true, margin: "-60px" }}
       variants={{
         hidden: {},
@@ -182,5 +232,61 @@ export function LiveDot({
       )}
       <span className={cn("relative size-2 rounded-full", color)} />
     </span>
+  );
+}
+
+/**
+ * A restrained pointer-following tilt for interactive surfaces.
+ * The effect is disabled for touch input and reduced-motion preferences.
+ */
+export function TiltSurface({
+  children,
+  className,
+  as = "div",
+  maxTilt = 3,
+}: {
+  children: ReactNode;
+  className?: string;
+  as?: "div" | "section" | "article";
+  maxTilt?: number;
+}) {
+  const reduce = useReducedMotion();
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const rotateX = useSpring(x, { stiffness: 180, damping: 22, mass: 0.45 });
+  const rotateY = useSpring(y, { stiffness: 180, damping: 22, mass: 0.45 });
+  const MotionTag = motion[as];
+
+  const handlePointerMove = (event: PointerEvent<HTMLElement>) => {
+    if (reduce || event.pointerType === "touch") return;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const horizontal = (event.clientX - bounds.left) / bounds.width - 0.5;
+    const vertical = (event.clientY - bounds.top) / bounds.height - 0.5;
+    x.set(vertical * -maxTilt);
+    y.set(horizontal * maxTilt);
+  };
+
+  const resetTilt = () => {
+    x.set(0);
+    y.set(0);
+  };
+
+  return (
+    <MotionTag
+      className={cn("tilt-surface", className)}
+      style={{
+        rotateX: reduce ? 0 : rotateX,
+        rotateY: reduce ? 0 : rotateY,
+        transformPerspective: 1100,
+        transformStyle: "preserve-3d",
+      }}
+      onPointerMove={handlePointerMove}
+      onPointerLeave={resetTilt}
+      whileHover={reduce ? undefined : { y: -2 }}
+      whileTap={reduce ? undefined : { scale: 0.995 }}
+      transition={{ type: "spring", stiffness: 260, damping: 24 }}
+    >
+      {children}
+    </MotionTag>
   );
 }
