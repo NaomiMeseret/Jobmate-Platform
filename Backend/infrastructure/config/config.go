@@ -1,6 +1,7 @@
 package config
 
 import (
+	"os"
 	"strings"
 	"time"
 
@@ -92,14 +93,20 @@ type Config struct {
 // LoadConfig loads config.env from project root (if present) and also supports environment variables.
 // If config.env is missing, it falls back to environment variables.
 func LoadConfig() (*Config, error) {
-	// Tell viper to look for config file in the root folder
+	// Support both the legacy config.env file and the standard .env file.
 	viper.AddConfigPath(".")
 	viper.SetConfigName("config")
 	viper.SetConfigType("env")
 	viper.AutomaticEnv()
 
-	// Read the config file
 	_ = viper.ReadInConfig()
+
+	// .env takes precedence over config.env when both files exist.
+	if _, err := os.Stat(".env"); err == nil {
+		viper.SetConfigFile(".env")
+		viper.SetConfigType("env")
+		_ = viper.ReadInConfig()
+	}
 
 	// Now populate your config struct
 	geminiModel := viper.GetString("GEMINI_MODEL_NAME")
