@@ -1,6 +1,5 @@
 "use client";
 
-import { Globe } from "lucide-react";
 import { useLanguage } from "@/providers/language-provider";
 import { cn } from "@/lib/utils";
 
@@ -9,10 +8,9 @@ export default function LanguageSelector() {
 
   return (
     <div
-      className="inline-flex h-10 items-center gap-1 rounded-lg border border-[var(--border)] bg-[var(--bg-surface)] p-1 text-sm font-medium text-[var(--text-muted)] shadow-sm backdrop-blur-xl"
+      className="inline-flex h-8 items-center rounded-md border border-[var(--border)] bg-[var(--bg-surface)] p-0.5"
       aria-label="Language selector"
     >
-      <Globe className="ml-2 size-4" aria-hidden="true" />
       {[
         { value: "en", label: "EN" },
         { value: "am", label: "አማ" },
@@ -23,10 +21,10 @@ export default function LanguageSelector() {
           onClick={() => setLanguage(option.value as "en" | "am")}
           aria-pressed={language === option.value}
           className={cn(
-            "h-8 rounded-md px-2.5 transition",
+            "h-7 rounded px-2.5 text-xs font-medium transition-colors",
             language === option.value
-              ? "bg-[var(--accent-gold)] text-[#080c18]"
-              : "hover:bg-[var(--bg-surface-hover)] hover:text-[var(--text-primary)]"
+              ? "bg-[var(--accent-subtle)] text-[var(--accent)]"
+              : "text-[var(--text-muted)] hover:text-[var(--text-primary)]"
           )}
         >
           {option.label}

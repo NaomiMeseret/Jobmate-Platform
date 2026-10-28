@@ -44,25 +44,20 @@ function PaymentSuccessContent() {
 
   const Icon =
     status === "checking" ? Loader2 : status === "paid" ? CheckCircle2 : XCircle;
+  const iconColor =
+    status === "failed" ? "text-[var(--danger)]" : "text-[var(--accent)]";
 
   return (
-    <main className="min-h-screen bg-[var(--bg-base)] px-4 py-24 text-[var(--text-primary)]">
-      <section className="glass-card mx-auto max-w-xl p-8 text-center">
-        <Icon
-          className={`mx-auto h-12 w-12 ${
-            status === "checking" ? "animate-spin text-[var(--accent-gold)]" : ""
-          }`}
-        />
-        <h1 className="mt-6 font-display text-4xl font-semibold">
-          {status === "paid" ? "Payment Verified" : "Payment Status"}
+    <main className="flex min-h-screen items-center justify-center bg-[var(--bg-base)] px-4 py-16 text-[var(--text-primary)]">
+      <section className="card mx-auto w-full max-w-md p-8 text-center">
+        <Icon className={`mx-auto size-10 ${iconColor} ${status === "checking" ? "animate-spin" : ""}`} />
+        <h1 className="mt-4 text-xl font-semibold tracking-tight">
+          {status === "paid" ? "Payment verified" : "Payment status"}
         </h1>
-        <p className="mt-4 text-base leading-8 text-[var(--text-muted)]">
+        <p className="mt-2 text-sm leading-6 text-[var(--text-muted)]">
           {message}
         </p>
-        <Link
-          href="/dashboard"
-          className="mt-8 inline-flex rounded-lg bg-[var(--accent-gold)] px-5 py-3 text-sm font-bold text-[#080C18]"
-        >
+        <Link href="/dashboard" className="btn-primary mt-6">
           Back to dashboard
         </Link>
       </section>

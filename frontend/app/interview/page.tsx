@@ -46,49 +46,45 @@ export default function Interview() {
       title="Practice with the mode that matches your next interview."
       description="Choose open-ended coaching, structured question practice, or return to saved interview sessions."
     >
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-px overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--border)] md:grid-cols-2">
         {modes.map((mode) => {
           const Icon = mode.icon;
           return (
             <Link
               key={mode.title}
               href={mode.href}
-              className="group rounded-lg border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-[#9ad5c8] hover:shadow-lg"
+              className="group flex items-start gap-4 bg-[var(--bg-surface)] p-5 transition-colors hover:bg-[var(--bg-surface-hover)]"
             >
-              <span className="grid size-12 place-items-center rounded-lg bg-[#e8f3ef] text-[#155e51]">
-                <Icon className="size-5" />
+              <span className="icon-box">
+                <Icon className="size-4" />
               </span>
-              <h2 className="mt-6 text-xl font-black text-slate-950">
-                {mode.title}
-              </h2>
-              <p className="mt-2 text-sm leading-6 text-slate-600">
-                {mode.description}
-              </p>
-              <span className="mt-5 inline-flex items-center gap-2 text-sm font-black text-[#1f6f60]">
-                Open
-                <ArrowRight className="size-4 transition group-hover:translate-x-1" />
-              </span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-3">
+                  <h2 className="text-sm font-semibold">{mode.title}</h2>
+                  <ArrowRight className="size-4 shrink-0 text-[var(--text-muted)] transition-transform group-hover:translate-x-0.5" />
+                </div>
+                <p className="mt-1 text-sm leading-6 text-[var(--text-muted)]">
+                  {mode.description}
+                </p>
+              </div>
             </Link>
           );
         })}
       </div>
 
       <Surface className="mt-6">
-        <h2 className="text-xl font-black">Practice tips</h2>
-        <div className="mt-4 grid gap-3 md:grid-cols-3">
-          {[
-            "Answer out loud before typing to build fluency.",
-            "Use STAR for behavioral answers: situation, task, action, result.",
-            "Ask for another version of feedback when a response feels unclear.",
-          ].map((tip) => (
-            <div
-              key={tip}
-              className="rounded-lg border border-slate-200 bg-[#fbfcf8] p-4 text-sm font-semibold leading-6 text-slate-700"
-            >
-              {tip}
-            </div>
-          ))}
-        </div>
+        <h2 className="text-base font-semibold">Practice tips</h2>
+        <ul className="mt-4 grid gap-3 text-sm leading-6 text-[var(--text-muted)] md:grid-cols-3">
+          <li className="rounded-md border border-[var(--border)] bg-[var(--bg-subtle)] p-4">
+            Answer out loud before typing to build fluency.
+          </li>
+          <li className="rounded-md border border-[var(--border)] bg-[var(--bg-subtle)] p-4">
+            Use STAR for behavioral answers: situation, task, action, result.
+          </li>
+          <li className="rounded-md border border-[var(--border)] bg-[var(--bg-subtle)] p-4">
+            Ask for another version of feedback when a response feels unclear.
+          </li>
+        </ul>
       </Surface>
     </AppShell>
   );

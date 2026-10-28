@@ -3,7 +3,11 @@
 import Link from "next/link";
 import { BookOpen, ExternalLink, Loader2 } from "lucide-react";
 import { useGetSuggestionsQuery } from "@/lib/redux/api/cvApi";
-import { AppShell, EmptyState, Surface } from "../components/modern/AppShell";
+import {
+  AppShell,
+  EmptyState,
+  Surface,
+} from "../components/modern/AppShell";
 import { useLanguage } from "@/providers/language-provider";
 
 type Course = {
@@ -85,7 +89,7 @@ export default function Page() {
     >
       <Surface>
         {isLoading ? (
-          <div className="flex items-center gap-2 text-sm font-semibold text-slate-500">
+          <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
             <Loader2 className="size-4 animate-spin" />
             {c.loading}
           </div>
@@ -94,22 +98,16 @@ export default function Page() {
             title={status === 404 ? c.noCv : c.analyzeFirst}
             description={c.noCvDesc}
           >
-            <Link
-              href="/cv"
-              className="inline-flex h-11 items-center rounded-lg bg-[#183d3d] px-5 text-sm font-black text-white"
-            >
+            <Link href="/cv" className="btn-primary">
               {c.openCv}
             </Link>
           </EmptyState>
         ) : error ? (
-          <EmptyState
-            title={c.errorTitle}
-            description={c.errorDesc}
-          >
+          <EmptyState title={c.errorTitle} description={c.errorDesc}>
             <button
               type="button"
               onClick={() => refetch()}
-              className="inline-flex h-11 items-center rounded-lg bg-[#183d3d] px-5 text-sm font-black text-white"
+              className="btn-primary"
             >
               {c.retry}
             </button>
@@ -119,47 +117,43 @@ export default function Page() {
             {courses.map((course, index) => (
               <article
                 key={`${course.Title || "course"}-${index}`}
-                className="rounded-lg border border-slate-200 bg-[#fbfcf8] p-5 shadow-sm"
+                className="flex flex-col rounded-md border border-[var(--border)] bg-[var(--bg-surface)] p-5"
               >
                 <div className="flex items-start justify-between gap-4">
-                  <span className="grid size-11 place-items-center rounded-lg bg-[#e8f3ef] text-[#155e51]">
-                    <BookOpen className="size-5" />
+                  <span className="icon-box">
+                    <BookOpen className="size-4" />
                   </span>
                   {course.URL && (
                     <a
                       href={course.URL}
                       target="_blank"
                       rel="noreferrer"
-                      className="inline-flex h-9 items-center gap-2 rounded-lg bg-white px-3 text-xs font-black text-slate-700 transition hover:bg-slate-50"
+                      className="btn-secondary btn-sm"
                     >
                       {c.open}
                       <ExternalLink className="size-3" />
                     </a>
                   )}
                 </div>
-                <h2 className="mt-5 text-lg font-black text-slate-950">
+                <h2 className="mt-4 text-sm font-semibold leading-6">
                   {course.Title || c.recommended}
                 </h2>
-                <p className="mt-2 text-sm font-bold text-[#1f6f60]">
+                <p className="mt-1 text-sm text-[var(--accent)]">
                   {course.Provider || c.provider}
                 </p>
                 {course.Skill && (
-                  <p className="mt-3 rounded-lg bg-white px-3 py-2 text-sm font-semibold text-slate-600">
+                  <p className="mt-3 inline-flex w-fit rounded border border-[var(--accent-border)] bg-[var(--accent-subtle)] px-2 py-0.5 text-xs font-medium text-[var(--accent)]">
                     {c.skill}: {course.Skill}
                   </p>
                 )}
-                <p className="mt-3 text-sm leading-6 text-slate-600">
-                  {course.Description ||
-                    c.noDescription}
+                <p className="mt-3 text-sm leading-6 text-[var(--text-muted)]">
+                  {course.Description || c.noDescription}
                 </p>
               </article>
             ))}
           </div>
         ) : (
-          <EmptyState
-            title={c.emptyTitle}
-            description={c.emptyDesc}
-          />
+          <EmptyState title={c.emptyTitle} description={c.emptyDesc} />
         )}
       </Surface>
     </AppShell>

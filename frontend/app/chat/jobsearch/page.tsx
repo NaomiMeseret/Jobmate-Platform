@@ -16,7 +16,12 @@ import {
   useGetChatByIdQuery,
   useSendMsgMutation,
 } from "@/lib/redux/api/JobApi";
-import { AppShell, EmptyState, Surface } from "@/app/components/modern/AppShell";
+import {
+  AppShell,
+  EmptyState,
+  SectionHeader,
+  Surface,
+} from "@/app/components/modern/AppShell";
 import { useLanguage } from "@/providers/language-provider";
 
 type Job = {
@@ -226,19 +231,13 @@ export default function JobSearch() {
     >
       <div className="grid gap-6 xl:grid-cols-[320px_1fr]">
         <Surface>
-          <div className="mb-5 flex items-center gap-3">
-            <span className="grid size-11 place-items-center rounded-lg bg-[#e8f3ef] text-[#155e51]">
-              <History className="size-5" />
-            </span>
-            <div>
-              <h2 className="text-xl font-black">{c.savedTitle}</h2>
-              <p className="text-sm text-slate-500">
-                {c.savedDesc}
-              </p>
-            </div>
-          </div>
+          <SectionHeader
+            icon={<History className="size-4" />}
+            title={c.savedTitle}
+            description={c.savedDesc}
+          />
           {chatsLoading ? (
-            <p className="text-sm text-slate-500">{c.loading}</p>
+            <p className="muted">{c.loading}</p>
           ) : jobChats.length ? (
             <div className="space-y-2">
               {jobChats.map((chat) => {
@@ -249,15 +248,19 @@ export default function JobSearch() {
                     key={chatId}
                     type="button"
                     onClick={() => setSelectedChatId(chatId)}
-                    className="w-full rounded-lg border border-slate-200 bg-slate-50 p-3 text-left transition hover:border-[#9ad5c8] hover:bg-white"
+                    className={
+                      chatId === selectedChatId
+                        ? "w-full rounded-md border border-[var(--accent-border)] bg-[var(--accent-subtle)] p-3 text-left"
+                        : "w-full rounded-md border border-[var(--border)] bg-[var(--bg-surface)] p-3 text-left transition-colors hover:border-[var(--border-strong)] hover:bg-[var(--bg-surface-hover)]"
+                    }
                   >
-                    <p className="text-sm font-black text-slate-900">
+                    <p className="truncate text-sm font-medium">
                       {(last?.content || last?.message || c.defaultChat).slice(
                         0,
                         90
                       )}
                     </p>
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="mt-0.5 text-xs text-[var(--text-muted)]">
                       {chat.updated_at
                         ? new Date(chat.updated_at).toLocaleString()
                         : chatId}
@@ -267,34 +270,25 @@ export default function JobSearch() {
               })}
             </div>
           ) : (
-            <EmptyState
-              title={c.emptyTitle}
-              description={c.emptyDesc}
-            />
+            <EmptyState title={c.emptyTitle} description={c.emptyDesc} />
           )}
         </Surface>
 
         <Surface className="min-h-[700px]">
-          <div className="mb-5 flex items-center gap-3">
-            <span className="grid size-11 place-items-center rounded-lg bg-[#e8f3ef] text-[#155e51]">
-              <Briefcase className="size-5" />
-            </span>
-            <div>
-              <h2 className="text-xl font-black">{c.assistantTitle}</h2>
-              <p className="text-sm text-slate-500">
-                {selectedChatId || c.newSearch}
-              </p>
-            </div>
-          </div>
+          <SectionHeader
+            icon={<Briefcase className="size-4" />}
+            title={c.assistantTitle}
+            description={selectedChatId || c.newSearch}
+          />
 
-          <div className="flex h-[520px] flex-col gap-4 overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-4">
+          <div className="chat-panel h-[520px]">
             {visibleMessages.map((message, index) => (
               <div
                 key={`${message.role}-${index}`}
                 className={
                   message.role === "user"
-                    ? "ml-auto max-w-[84%] rounded-lg bg-[#183d3d] px-4 py-3 text-white"
-                    : "mr-auto w-full max-w-[92%] rounded-lg border border-slate-200 bg-white px-4 py-3 text-slate-700"
+                    ? "chat-user"
+                    : "chat-assistant w-full max-w-[92%]"
                 }
               >
                 <div className="markdown-body text-sm">
@@ -304,24 +298,24 @@ export default function JobSearch() {
                 </div>
                 {message.jobs?.length ? (
                   <div className="mt-4 grid gap-3">
-                    <p className="text-xs font-black uppercase tracking-[0.14em] text-[#1f6f60]">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-[var(--accent)]">
                       {message.jobs.length} matched{" "}
                       {message.jobs.length === 1 ? "role" : "roles"}
                     </p>
                     {message.jobs.map((job, jobIndex) => (
                       <article
                         key={`${job.title}-${jobIndex}`}
-                        className="rounded-lg border border-slate-200 bg-[#fbfcf8] p-4"
+                        className="rounded-md border border-[var(--border)] bg-[var(--bg-surface)] p-4"
                       >
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                           <div>
-                            <h3 className="text-base font-black text-slate-950">
+                            <h3 className="text-sm font-semibold">
                               {job.title || c.untitled}
                             </h3>
-                            <p className="mt-1 text-sm font-semibold text-slate-600">
+                            <p className="mt-1 text-sm text-[var(--text-muted)]">
                               {job.company || c.companyMissing}
                             </p>
-                            <p className="mt-2 inline-flex items-center gap-1 text-xs font-bold text-slate-500">
+                            <p className="mt-1.5 inline-flex items-center gap-1 text-xs text-[var(--text-muted)]">
                               <MapPin className="size-3" />
                               {job.location || c.locationFlexible}
                             </p>
@@ -331,28 +325,28 @@ export default function JobSearch() {
                               href={job.link}
                               target="_blank"
                               rel="noreferrer"
-                              className="inline-flex h-9 items-center justify-center gap-2 rounded-lg bg-[#183d3d] px-3 text-xs font-black text-white transition hover:bg-[#235553]"
+                              className="btn-primary btn-sm shrink-0"
                             >
                               {c.view}
                               <ExternalLink className="size-3" />
                             </a>
                           )}
                         </div>
-                        <div className="mt-3 flex flex-wrap gap-2">
+                        <div className="mt-3 flex flex-wrap gap-1.5">
                           {job.type && (
-                            <span className="rounded-lg bg-white px-2 py-1 text-xs font-black text-[#1f6f60]">
+                            <span className="rounded border border-[var(--accent-border)] bg-[var(--accent-subtle)] px-2 py-0.5 text-xs font-medium text-[var(--accent)]">
                               {job.type}
                             </span>
                           )}
                           {job.source && (
-                            <span className="rounded-lg bg-white px-2 py-1 text-xs font-black text-slate-500">
+                            <span className="rounded border border-[var(--border)] px-2 py-0.5 text-xs text-[var(--text-muted)]">
                               {job.source}
                             </span>
                           )}
                           {job.requirements?.slice(0, 5).map((req) => (
                             <span
                               key={req}
-                              className="rounded-lg bg-white px-2 py-1 text-xs font-semibold text-slate-600"
+                              className="rounded border border-[var(--border)] px-2 py-0.5 text-xs text-[var(--text-muted)]"
                             >
                               {req}
                             </span>
@@ -371,12 +365,13 @@ export default function JobSearch() {
               value={draft}
               onChange={(event) => setDraft(event.target.value)}
               placeholder={c.placeholder}
-              className="modern-input"
+              className="input"
+              aria-label={c.searchJobs}
             />
             <button
               type="submit"
               disabled={sending || !draft.trim()}
-              className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#183d3d] text-white transition hover:bg-[#235553] disabled:opacity-60"
+              className="btn-primary size-10 shrink-0 !px-0"
               aria-label={c.searchJobs}
             >
               {sending ? (

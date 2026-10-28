@@ -3,7 +3,12 @@
 import Link from "next/link";
 import { ArrowRight, History } from "lucide-react";
 import { useGetFreeformUserChatsQuery } from "@/lib/redux/api/interviewApi";
-import { AppShell, EmptyState, Surface } from "@/app/components/modern/AppShell";
+import {
+  AppShell,
+  EmptyState,
+  SectionHeader,
+  Surface,
+} from "@/app/components/modern/AppShell";
 
 export default function FreeformHistoryAll() {
   const { data, isLoading } = useGetFreeformUserChatsQuery();
@@ -16,18 +21,14 @@ export default function FreeformHistoryAll() {
       description="Pick up where you left off or review past interview practice."
     >
       <Surface>
-        <div className="mb-5 flex items-center gap-3">
-          <span className="grid size-11 place-items-center rounded-lg bg-[#e8f3ef] text-[#155e51]">
-            <History className="size-5" />
-          </span>
-          <div>
-            <h2 className="text-xl font-black">Saved free-form sessions</h2>
-            <p className="text-sm text-slate-500">{chats.length} sessions</p>
-          </div>
-        </div>
+        <SectionHeader
+          icon={<History className="size-4" />}
+          title="Saved free-form sessions"
+          description={`${chats.length} sessions`}
+        />
 
         {isLoading ? (
-          <p className="text-sm text-slate-500">Loading sessions...</p>
+          <p className="muted">Loading sessions...</p>
         ) : chats.length ? (
           <div className="grid gap-3 md:grid-cols-2">
             {chats.map((chat) => (
@@ -36,21 +37,21 @@ export default function FreeformHistoryAll() {
                 href={`/interview/freefrom/AIchat?chat_id=${encodeURIComponent(
                   chat.chat_id
                 )}`}
-                className="group rounded-lg border border-slate-200 bg-slate-50 p-4 transition hover:border-[#9ad5c8] hover:bg-white"
+                className="group rounded-md border border-[var(--border)] bg-[var(--bg-surface)] p-4 transition-colors hover:border-[var(--border-strong)] hover:bg-[var(--bg-surface-hover)]"
               >
                 <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="text-sm font-black uppercase text-[#1f6f60]">
+                  <div className="min-w-0">
+                    <p className="truncate text-xs font-semibold uppercase tracking-wider text-[var(--accent)]">
                       {chat.session_type}
                     </p>
-                    <h3 className="mt-2 text-lg font-black text-slate-950">
+                    <h3 className="mt-1.5 text-sm font-medium leading-6">
                       {chat.last_message || "Interview session"}
                     </h3>
-                    <p className="mt-2 text-xs text-slate-500">
+                    <p className="mt-1 text-xs text-[var(--text-muted)]">
                       {new Date(chat.updated_at).toLocaleString()}
                     </p>
                   </div>
-                  <ArrowRight className="size-4 text-slate-400 transition group-hover:translate-x-1" />
+                  <ArrowRight className="size-4 shrink-0 text-[var(--text-muted)] transition-transform group-hover:translate-x-0.5" />
                 </div>
               </Link>
             ))}
@@ -60,10 +61,7 @@ export default function FreeformHistoryAll() {
             title="No free-form interviews yet"
             description="Create your first coaching room to build history."
           >
-            <Link
-              href="/interview/freefrom/session"
-              className="inline-flex h-11 items-center rounded-lg bg-[#183d3d] px-5 text-sm font-black text-white"
-            >
+            <Link href="/interview/freefrom/session" className="btn-primary">
               Create session
             </Link>
           </EmptyState>

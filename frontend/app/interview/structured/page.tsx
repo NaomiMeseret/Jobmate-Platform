@@ -10,7 +10,12 @@ import {
   useAnswerStructuredQuestionMutation,
   useStartStructuredInterviewMutation,
 } from "@/lib/redux/api/interviewApi";
-import { AppShell, EmptyState, Surface } from "@/app/components/modern/AppShell";
+import {
+  AppShell,
+  EmptyState,
+  SectionHeader,
+  Surface,
+} from "@/app/components/modern/AppShell";
 
 function StructuredQuestion() {
   const searchParams = useSearchParams();
@@ -95,10 +100,7 @@ function StructuredQuestion() {
       title={field ? `${field} interview` : "Structured interview"}
       description="Answer each generated question and receive AI feedback before the next prompt."
       actions={
-        <Link
-          href="/interview/structured/history/all"
-          className="inline-flex h-11 items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-black text-slate-700 transition hover:bg-slate-50"
-        >
+        <Link href="/interview/structured/history/all" className="btn-secondary">
           <History className="size-4" />
           History
         </Link>
@@ -110,73 +112,68 @@ function StructuredQuestion() {
             title="Choose a field first"
             description="Structured interviews need a role or field so JobMate can generate relevant questions."
           >
-            <Link
-              href="/interview/structured/field"
-              className="inline-flex h-11 items-center rounded-lg bg-[#183d3d] px-5 text-sm font-black text-white"
-            >
+            <Link href="/interview/structured/field" className="btn-primary">
               Enter field
             </Link>
           </EmptyState>
         ) : (
           <>
             <div className="mb-6">
-              <div className="mb-2 flex items-center justify-between text-sm font-bold text-slate-500">
+              <div className="mb-2 flex items-center justify-between text-xs font-medium text-[var(--text-muted)]">
                 <span>
                   Question {Math.min(questionNumber, totalQuestions)} of{" "}
                   {totalQuestions}
                 </span>
                 <span>{Math.round(progress)}%</span>
               </div>
-              <div className="h-2 overflow-hidden rounded-full bg-slate-200">
+              <div
+                className="h-1.5 overflow-hidden rounded-full bg-[var(--bg-subtle)]"
+                role="progressbar"
+                aria-valuenow={Math.round(progress)}
+                aria-valuemin={0}
+                aria-valuemax={100}
+              >
                 <div
-                  className="h-full rounded-full bg-[#2f7d6d]"
+                  className="h-full rounded-full bg-[var(--accent)] transition-[width] duration-300"
                   style={{ width: `${progress}%` }}
                 />
               </div>
             </div>
 
-            {error && (
-              <p className="mb-4 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">
-                {error}
-              </p>
-            )}
+            {error && <p className="alert-error mb-4">{error}</p>}
 
             {starting ? (
-              <div className="flex items-center gap-2 text-sm font-semibold text-slate-500">
+              <div className="flex items-center gap-2 text-sm text-[var(--text-muted)]">
                 <Loader2 className="size-4 animate-spin" />
                 Starting interview...
               </div>
             ) : completed ? (
-              <div className="rounded-lg border border-[#bfe7dc] bg-[#e8f3ef] p-6 text-center">
-                <Trophy className="mx-auto size-10 text-[#155e51]" />
-                <h2 className="mt-4 text-2xl font-black">
+              <div className="rounded-md border border-[var(--accent-border)] bg-[var(--accent-subtle)] p-6 text-center">
+                <Trophy className="mx-auto size-8 text-[var(--accent)]" />
+                <h2 className="mt-3 text-lg font-semibold">
                   Interview completed
                 </h2>
-                <p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-600">
+                <p className="mx-auto mt-1.5 max-w-xl text-sm leading-6 text-[var(--text-muted)]">
                   Review your feedback and open history whenever you want to
                   inspect the session again.
                 </p>
               </div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-5">
-                <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
-                  <p className="text-xs font-black uppercase tracking-[0.18em] text-[#2f7d6d]">
-                    Current question
-                  </p>
-                  <p className="mt-3 text-lg font-bold leading-8 text-slate-900">
+                <div className="rounded-md border border-[var(--border)] bg-[var(--bg-subtle)] p-5">
+                  <p className="eyebrow">Current question</p>
+                  <p className="mt-2.5 text-base leading-7">
                     {question || "Waiting for the next question..."}
                   </p>
                 </div>
 
                 <label className="block">
-                  <span className="mb-1.5 block text-sm font-bold text-slate-700">
-                    Your answer
-                  </span>
+                  <span className="field-label">Your answer</span>
                   <textarea
                     value={answer}
                     onChange={(event) => setAnswer(event.target.value)}
                     rows={8}
-                    className="modern-input resize-y"
+                    className="input resize-y"
                     placeholder="Write a complete answer with context, action, and result..."
                   />
                 </label>
@@ -184,7 +181,7 @@ function StructuredQuestion() {
                 <button
                   type="submit"
                   disabled={submitting || !answer.trim()}
-                  className="inline-flex h-11 items-center gap-2 rounded-lg bg-[#183d3d] px-5 text-sm font-black text-white transition hover:bg-[#235553] disabled:opacity-60"
+                  className="btn-primary"
                 >
                   {submitting ? (
                     <Loader2 className="size-4 animate-spin" />
@@ -197,9 +194,9 @@ function StructuredQuestion() {
             )}
 
             {feedback && (
-              <div className="mt-6 rounded-lg border border-slate-200 bg-white p-5">
-                <h2 className="text-xl font-black">Feedback</h2>
-                <div className="markdown-body mt-3">
+              <div className="mt-6">
+                <SectionHeader title="Feedback" />
+                <div className="markdown-body rounded-md border border-[var(--border)] bg-[var(--bg-subtle)] p-5">
                   <ReactMarkdown remarkPlugins={[remarkGfm]}>
                     {feedback}
                   </ReactMarkdown>
@@ -215,7 +212,7 @@ function StructuredQuestion() {
 
 export default function StructuredPage() {
   return (
-    <Suspense fallback={<div className="p-8 text-slate-600">Loading...</div>}>
+    <Suspense fallback={<div className="p-8 text-[var(--text-muted)]">Loading...</div>}>
       <StructuredQuestion />
     </Suspense>
   );

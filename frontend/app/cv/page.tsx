@@ -21,7 +21,12 @@ import {
   useStartSessionMutation,
   useUploadCVMutation,
 } from "@/lib/redux/api/cvApi";
-import { AppShell, EmptyState, Surface } from "../components/modern/AppShell";
+import {
+  AppShell,
+  EmptyState,
+  SectionHeader,
+  Surface,
+} from "../components/modern/AppShell";
 
 type ChatMessage = {
   id?: string;
@@ -310,10 +315,7 @@ export default function CvPage() {
       title="Analyze, improve, and discuss your CV."
       description="Upload a PDF/DOCX or paste resume text, then get practical feedback and continue with a CV-aware chat."
       actions={
-        <Link
-          href="/course"
-          className="inline-flex h-11 items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-black text-slate-700 transition hover:bg-slate-50"
-        >
+        <Link href="/course" className="btn-secondary">
           Course suggestions
           <ArrowRight className="size-4" />
         </Link>
@@ -322,23 +324,15 @@ export default function CvPage() {
       <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
         <div className="space-y-6">
           <Surface>
-            <div className="mb-5 flex items-center gap-3">
-              <span className="grid size-11 place-items-center rounded-lg bg-[#e8f3ef] text-[#155e51]">
-                <Upload className="size-5" />
-              </span>
-              <div>
-                <h2 className="text-xl font-black">Upload or paste CV</h2>
-                <p className="text-sm text-slate-500">
-                  Use one input at a time for the backend validator.
-                </p>
-              </div>
-            </div>
+            <SectionHeader
+              icon={<Upload className="size-4" />}
+              title="Upload or paste CV"
+              description="Use one input at a time for the backend validator."
+            />
 
             <form onSubmit={handleUpload} className="space-y-4">
               <label className="block">
-                <span className="mb-1.5 block text-sm font-bold text-slate-700">
-                  CV file
-                </span>
+                <span className="field-label">CV file</span>
                 <input
                   type="file"
                   accept=".pdf,.docx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
@@ -346,14 +340,12 @@ export default function CvPage() {
                     setFile(event.target.files?.[0] || null);
                     if (event.target.files?.[0]) setRawText("");
                   }}
-                  className="modern-input"
+                  className="input"
                 />
               </label>
 
               <label className="block">
-                <span className="mb-1.5 block text-sm font-bold text-slate-700">
-                  Or paste resume text
-                </span>
+                <span className="field-label">Or paste resume text</span>
                 <textarea
                   value={rawText}
                   onChange={(event) => {
@@ -362,20 +354,16 @@ export default function CvPage() {
                   }}
                   rows={8}
                   placeholder="Paste your education, experience, skills, and projects..."
-                  className="modern-input resize-y"
+                  className="input resize-y"
                 />
               </label>
 
-              {error && (
-                <p className="rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">
-                  {error}
-                </p>
-              )}
+              {error && <p className="alert-error">{error}</p>}
 
               <button
                 type="submit"
                 disabled={uploading || analyzing || (!file && !rawText.trim())}
-                className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-lg bg-[#183d3d] px-5 text-sm font-black text-white transition hover:bg-[#235553] disabled:cursor-not-allowed disabled:opacity-60"
+                className="btn-primary h-11 w-full"
               >
                 {(uploading || analyzing) && (
                   <Loader2 className="size-4 animate-spin" />
@@ -383,38 +371,32 @@ export default function CvPage() {
                 {uploading
                   ? "Uploading..."
                   : analyzing
-                  ? "Analyzing..."
-                  : "Upload and analyze"}
+                    ? "Analyzing..."
+                    : "Upload and analyze"}
               </button>
             </form>
           </Surface>
 
           <Surface>
-            <div className="mb-5 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <span className="grid size-11 place-items-center rounded-lg bg-[#e8f3ef] text-[#155e51]">
-                  <History className="size-5" />
-                </span>
-                <div>
-                  <h2 className="text-xl font-black">CV chat history</h2>
-                  <p className="text-sm text-slate-500">
-                    Resume previous CV conversations and keep improving your profile.
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => openChat()}
-                disabled={startingSession}
-                className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#183d3d] px-4 text-sm font-black text-white transition hover:bg-[#235553] disabled:opacity-60"
-              >
-                <MessageCircle className="size-4" />
-                New chat
-              </button>
-            </div>
+            <SectionHeader
+              icon={<History className="size-4" />}
+              title="CV chat history"
+              description="Resume previous CV conversations and keep improving your profile."
+              action={
+                <button
+                  type="button"
+                  onClick={() => openChat()}
+                  disabled={startingSession}
+                  className="btn-secondary btn-sm"
+                >
+                  <MessageCircle className="size-4" />
+                  New chat
+                </button>
+              }
+            />
 
             {chatsLoading ? (
-              <p className="text-sm text-slate-500">Loading chats...</p>
+              <p className="muted">Loading chats...</p>
             ) : cvChats.length ? (
               <div className="space-y-2">
                 {cvChats.map((chat) => (
@@ -422,13 +404,13 @@ export default function CvPage() {
                     key={chat.chat_id}
                     type="button"
                     onClick={() => openChat(chat.chat_id)}
-                    className="w-full rounded-lg border border-slate-200 bg-slate-50 p-3 text-left transition hover:border-[#9ad5c8] hover:bg-white"
+                    className="w-full rounded-md border border-[var(--border)] bg-[var(--bg-surface)] p-3 text-left transition-colors hover:border-[var(--border-strong)] hover:bg-[var(--bg-surface-hover)]"
                   >
-                    <p className="text-sm font-black text-slate-900">
+                    <p className="truncate text-sm font-medium">
                       {chat.messages?.at(-1)?.content?.slice(0, 80) ||
                         "CV conversation"}
                     </p>
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="mt-0.5 text-xs text-[var(--text-muted)]">
                       {chat.updated_at
                         ? new Date(chat.updated_at).toLocaleString()
                         : chat.chat_id}
@@ -447,20 +429,16 @@ export default function CvPage() {
 
         <div className="space-y-6">
           <Surface>
-            <div className="mb-5 flex items-center gap-3">
-              <span className="grid size-11 place-items-center rounded-lg bg-[#e8f3ef] text-[#155e51]">
-                <FileText className="size-5" />
-              </span>
-              <div>
-                <h2 className="text-xl font-black">Analysis</h2>
-                <p className="text-sm text-slate-500">
-                  {cvId ? `Current CV ID: ${cvId}` : "Upload a CV to begin."}
-                </p>
-              </div>
-            </div>
+            <SectionHeader
+              icon={<FileText className="size-4" />}
+              title="Analysis"
+              description={
+                cvId ? `Current CV ID: ${cvId}` : "Upload a CV to begin."
+              }
+            />
 
             {analysis ? (
-              <div className="markdown-body rounded-lg bg-slate-50 p-4">
+              <div className="markdown-body rounded-md border border-[var(--border)] bg-[var(--bg-subtle)] p-4">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
                   {analysis}
                 </ReactMarkdown>
@@ -474,19 +452,11 @@ export default function CvPage() {
           </Surface>
 
           <Surface className="min-h-[560px]">
-            <div className="mb-5 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3">
-                <span className="grid size-11 place-items-center rounded-lg bg-[#e8f3ef] text-[#155e51]">
-                  <MessageCircle className="size-5" />
-                </span>
-                <div>
-                  <h2 className="text-xl font-black">CV chat</h2>
-                  <p className="text-sm text-slate-500">
-                    {selectedChat || "Start or select a session."}
-                  </p>
-                </div>
-              </div>
-            </div>
+            <SectionHeader
+              icon={<MessageCircle className="size-4" />}
+              title="CV chat"
+              description={selectedChat || "Start or select a session."}
+            />
 
             {!selectedChat ? (
               <EmptyState
@@ -496,7 +466,7 @@ export default function CvPage() {
                 <button
                   type="button"
                   onClick={() => openChat()}
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-[#183d3d] px-5 text-sm font-black text-white transition hover:bg-[#235553]"
+                  className="btn-primary"
                 >
                   Start CV chat
                   <ArrowRight className="size-4" />
@@ -504,12 +474,14 @@ export default function CvPage() {
               </EmptyState>
             ) : (
               <>
-                <div className="flex h-[390px] flex-col gap-3 overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-4">
+                <div className="chat-panel h-[390px]">
                   {historyLoading && (
-                    <p className="text-sm text-slate-500">Loading history...</p>
+                    <p className="text-sm text-[var(--text-muted)]">
+                      Loading history...
+                    </p>
                   )}
                   {historyMessages.length === 0 && !historyLoading && (
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm text-[var(--text-muted)]">
                       Ask JobMate what to improve first.
                     </p>
                   )}
@@ -517,9 +489,7 @@ export default function CvPage() {
                     <div
                       key={`${message.timestamp || index}-${index}`}
                       className={
-                        message.role === "user"
-                          ? "ml-auto max-w-[86%] rounded-lg bg-[#183d3d] px-4 py-3 text-white"
-                          : "mr-auto max-w-[86%] rounded-lg border border-slate-200 bg-white px-4 py-3 text-slate-700"
+                        message.role === "user" ? "chat-user" : "chat-assistant"
                       }
                     >
                       <div className="markdown-body text-sm">
@@ -536,12 +506,12 @@ export default function CvPage() {
                     value={draft}
                     onChange={(event) => setDraft(event.target.value)}
                     placeholder="Ask how to improve your CV..."
-                    className="modern-input"
+                    className="input"
                   />
                   <button
                     type="submit"
                     disabled={sending || !draft.trim()}
-                    className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#183d3d] text-white transition hover:bg-[#235553] disabled:opacity-60"
+                    className="btn-primary size-10 shrink-0 !px-0"
                     aria-label="Send message"
                   >
                     {sending ? (

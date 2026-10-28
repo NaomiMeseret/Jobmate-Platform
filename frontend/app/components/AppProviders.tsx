@@ -1,8 +1,6 @@
 "use client";
 
-import { AnimatePresence } from "framer-motion";
 import { ThemeProvider } from "next-themes";
-import { usePathname } from "next/navigation";
 import type React from "react";
 import { Toaster } from "react-hot-toast";
 import ReduxProvider from "@/providers/ReduxProvider";
@@ -14,21 +12,24 @@ export default function AppProviders({
 }: {
   children: React.ReactNode;
 }) {
-  const pathname = usePathname();
-
   return (
     <ThemeProvider
       attribute="class"
-      defaultTheme="dark"
+      defaultTheme="light"
       enableSystem
       disableTransitionOnChange
     >
       <ReduxProvider>
         <LanguageProvider>
-          <AnimatePresence mode="wait" initial={false}>
-            <ProtectedWrapper key={pathname}>{children}</ProtectedWrapper>
-          </AnimatePresence>
-          <Toaster position="top-right" reverseOrder={false} />
+          <ProtectedWrapper>{children}</ProtectedWrapper>
+          <Toaster
+            position="top-right"
+            reverseOrder={false}
+            toastOptions={{
+              className:
+                "!rounded-md !border !border-[var(--border)] !bg-[var(--bg-surface)] !text-sm !text-[var(--text-primary)] !shadow-sm",
+            }}
+          />
         </LanguageProvider>
       </ReduxProvider>
     </ThemeProvider>

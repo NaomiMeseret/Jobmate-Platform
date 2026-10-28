@@ -3,9 +3,13 @@
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { Loader2, MessageCircle, Send, Sparkles } from "lucide-react";
+import { Loader2, MessageCircle, Send } from "lucide-react";
 import { useSendMessageMutation } from "@/lib/redux/api/generalApi";
-import { AppShell, Surface } from "@/app/components/modern/AppShell";
+import {
+  AppShell,
+  SectionHeader,
+  Surface,
+} from "@/app/components/modern/AppShell";
 import { useLanguage } from "@/providers/language-provider";
 
 type Message = {
@@ -103,27 +107,17 @@ export default function GeneralPage() {
       description={c.description}
     >
       <Surface className="mx-auto max-w-4xl">
-        <div className="mb-5 flex items-center gap-3">
-          <span className="grid size-11 place-items-center rounded-lg bg-[#e8f3ef] text-[#155e51]">
-            <MessageCircle className="size-5" />
-          </span>
-          <div>
-            <h2 className="text-xl font-black">{c.cardTitle}</h2>
-            <p className="text-sm text-slate-500">
-              {c.cardSubtitle}
-            </p>
-          </div>
-        </div>
+        <SectionHeader
+          icon={<MessageCircle className="size-4" />}
+          title={c.cardTitle}
+          description={c.cardSubtitle}
+        />
 
-        <div className="flex h-[560px] flex-col gap-3 overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-4">
+        <div className="chat-panel h-[560px]">
           {messages.map((message, index) => (
             <div
               key={`${message.role}-${index}`}
-              className={
-                message.role === "user"
-                  ? "ml-auto max-w-[84%] rounded-lg bg-[#183d3d] px-4 py-3 text-white"
-                  : "mr-auto max-w-[84%] rounded-lg border border-slate-200 bg-white px-4 py-3 text-slate-700"
-              }
+              className={message.role === "user" ? "chat-user" : "chat-assistant"}
             >
               <div className="markdown-body text-sm">
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
@@ -134,18 +128,17 @@ export default function GeneralPage() {
           ))}
         </div>
 
-        <div className="mt-4 grid gap-3 rounded-lg border border-slate-200 bg-[#fbfcf8] p-3 sm:grid-cols-3">
+        <div className="mt-4 flex flex-wrap gap-2">
           {c.prompts.map((prompt) => (
-              <button
-                key={prompt}
-                type="button"
-                onClick={() => setDraft(prompt)}
-                className="inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-left text-sm font-bold text-slate-700 transition hover:bg-slate-50"
-              >
-                <Sparkles className="size-4 text-[#2f7d6d]" />
-                {prompt}
-              </button>
-            ))}
+            <button
+              key={prompt}
+              type="button"
+              onClick={() => setDraft(prompt)}
+              className="btn-secondary btn-sm"
+            >
+              {prompt}
+            </button>
+          ))}
         </div>
 
         <form onSubmit={handleSend} className="mt-4 flex gap-2">
@@ -153,12 +146,13 @@ export default function GeneralPage() {
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
             placeholder={c.placeholder}
-            className="modern-input"
+            className="input"
+            aria-label={c.send}
           />
           <button
             type="submit"
             disabled={isLoading || !draft.trim()}
-            className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#183d3d] text-white transition hover:bg-[#235553] disabled:opacity-60"
+            className="btn-primary size-10 shrink-0 !px-0"
             aria-label={c.send}
           >
             {isLoading ? (

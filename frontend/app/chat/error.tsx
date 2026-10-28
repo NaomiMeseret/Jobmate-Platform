@@ -6,21 +6,25 @@ import { Button } from "../components/ui/Button";
 const ErrorPage = () => {
   const router = useRouter();
   return (
-    <div className="flex flex-col items-center justify-center min-h-120 text-center ">
-      <div className="">
-        <h1 className="text-8xl font-bold mt-10 text-[#2CA58D]">404</h1>
-        <h2 className="text-2xl font-semibold"> Page Not Found</h2>
-        <p className="text-sm text-gray-500 mt-4 mb-4">
-          Something went wrong. Try again Later
+    <main className="flex min-h-screen items-center justify-center bg-[var(--bg-base)] px-4 text-[var(--text-primary)]">
+      <div className="w-full max-w-xl border-t border-[var(--border-strong)] pt-8 text-center">
+        <p className="kicker-accent">Error 404</p>
+        <h1 className="display mt-4 text-6xl md:text-7xl">Page not found</h1>
+        <p className="lede mx-auto mt-4 max-w-md">
+          The page you are looking for has moved or no longer exists. Head back
+          to the start and pick up where you left off.
         </p>
-        <Button
-          className="bg-[#2CA58D] text-white px-4"
-          onClick={() => router.push("/")}
-        >
-          Go Home
-        </Button>
+        <div className="mt-8 flex items-center justify-center gap-3">
+          <Button onClick={() => router.push("/")}>Go home</Button>
+          <Button
+            variant="ghost"
+            onClick={() => router.push("/dashboard")}
+          >
+            Dashboard
+          </Button>
+        </div>
       </div>
-    </div>
+    </main>
   );
 };
 

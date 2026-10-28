@@ -291,8 +291,10 @@ const translations = {
 };
 
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
+  // The first render (server and client) always uses "en", so the tree
+  // hydrates cleanly; the saved preference is applied right after mount.
+  // Gating the whole tree on a mounted flag would ship an empty document.
   const [language, setLanguageState] = useState<Language>("en");
-  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     const savedLanguage = localStorage.getItem("jobmate-language") as Language;
@@ -300,7 +302,6 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       setLanguageState(savedLanguage);
       document.documentElement.lang = savedLanguage === "am" ? "am" : "en";
     }
-    setMounted(true);
   }, []);
 
   const setLanguage = (lang: Language) => {
@@ -317,9 +318,6 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     );
   };
 
-  if (!mounted) {
-    return null;
-  }
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t }}>
       {children}

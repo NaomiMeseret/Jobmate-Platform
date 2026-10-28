@@ -1,10 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { BookOpen, Briefcase, Lightbulb, PenLine, Sparkles, Target } from "lucide-react";
+import {
+  BookOpen,
+  Briefcase,
+  Lightbulb,
+  PenLine,
+  Target,
+  Users,
+} from "lucide-react";
 import { useLanguage } from "@/providers/language-provider";
 import { tips } from "../components/offline_tips/tips";
 import { AppShell, Surface } from "../components/modern/AppShell";
+import { cn } from "@/lib/utils";
 
 const tabs = [
   { id: "cv_guide", label: "CV Writing", icon: PenLine },
@@ -12,7 +20,7 @@ const tabs = [
   { id: "jobBoards", label: "Job Boards", icon: Briefcase },
   { id: "skill_enhancements", label: "Skill Growth", icon: BookOpen },
   { id: "marketInsights", label: "Market Insights", icon: Lightbulb },
-  { id: "motivation_tips", label: "Motivation", icon: Sparkles },
+  { id: "motivation_tips", label: "Motivation", icon: Users },
 ] as const;
 
 export default function Offline() {
@@ -30,9 +38,9 @@ export default function Offline() {
       title="Practical career tips, always close."
       description="Browse the built-in guidance library for CV writing, interviews, job boards, skill growth, market insight, and motivation."
     >
-      <div className="grid gap-6 xl:grid-cols-[300px_1fr]">
-        <Surface>
-          <div className="space-y-2">
+      <div className="grid gap-6 xl:grid-cols-[280px_1fr]">
+        <Surface className="h-fit !p-3">
+          <nav className="flex flex-col gap-0.5" aria-label="Tip categories">
             {tabs.map((tab) => {
               const Icon = tab.icon;
               return (
@@ -40,40 +48,36 @@ export default function Offline() {
                   key={tab.id}
                   type="button"
                   onClick={() => setActiveTab(tab.id)}
-                  className={
+                  aria-current={activeTab === tab.id ? "true" : undefined}
+                  className={cn(
+                    "flex items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors",
                     activeTab === tab.id
-                      ? "flex w-full items-center gap-3 rounded-lg bg-[#e8f3ef] px-3 py-3 text-left text-sm font-black text-[#155e51]"
-                      : "flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left text-sm font-bold text-slate-600 transition hover:bg-slate-50"
-                  }
+                      ? "bg-[var(--accent-subtle)] font-medium text-[var(--accent)]"
+                      : "text-[var(--text-muted)] hover:bg-[var(--bg-surface-hover)] hover:text-[var(--text-primary)]"
+                  )}
                 >
-                  <Icon className="size-4" />
+                  <Icon className="size-4 shrink-0" />
                   {tab.label}
                 </button>
               );
             })}
-          </div>
+          </nav>
         </Surface>
 
         <Surface>
-          <div className="mb-6 rounded-lg border border-[#bfe7dc] bg-[#e8f3ef] p-5">
-            <p className="text-xs font-black uppercase tracking-[0.18em] text-[#2f7d6d]">
-              Active guide
-            </p>
-            <h2 className="mt-2 text-2xl font-black text-slate-950">
-              {title}
-            </h2>
-          </div>
+          <p className="eyebrow">Active guide</p>
+          <h2 className="mt-2 text-xl font-semibold tracking-tight">{title}</h2>
 
-          <div className="grid gap-4 md:grid-cols-2">
+          <div className="mt-6 grid gap-4 md:grid-cols-2">
             {list.map((tip: string, index: number) => (
               <article
                 key={`${tip}-${index}`}
-                className="rounded-lg border border-slate-200 bg-[#fbfcf8] p-5"
+                className="rounded-md border border-[var(--border)] bg-[var(--bg-subtle)] p-5"
               >
-                <span className="text-xs font-black uppercase tracking-[0.18em] text-[#2f7d6d]">
+                <span className="text-xs font-semibold uppercase tracking-wider text-[var(--accent)]">
                   Tip {index + 1}
                 </span>
-                <p className="mt-3 text-sm leading-7 text-slate-600">
+                <p className="mt-2.5 text-sm leading-6 text-[var(--text-muted)]">
                   {tip}
                 </p>
               </article>
@@ -81,11 +85,11 @@ export default function Offline() {
           </div>
 
           {proTip.length > 0 && (
-            <div className="mt-5 rounded-lg border border-slate-200 bg-white p-5">
-              <h3 className="text-lg font-black text-slate-950">
+            <div className="mt-5 rounded-md border border-[var(--accent-border)] bg-[var(--accent-subtle)] p-5">
+              <h3 className="text-sm font-semibold text-[var(--accent)]">
                 {proTip[0]}
               </h3>
-              <p className="mt-2 text-sm leading-7 text-slate-600">
+              <p className="mt-2 text-sm leading-6 text-[var(--text-muted)]">
                 {proTip[1]}
               </p>
             </div>

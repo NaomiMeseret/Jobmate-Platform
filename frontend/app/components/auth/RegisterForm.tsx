@@ -105,6 +105,12 @@ export default function RegisterForm() {
           type="password"
         />
 
+        {password && passwordErrors.length > 0 && (
+          <p className="text-xs text-[var(--text-muted)]">
+            Password needs {passwordErrors.join(", ")}.
+          </p>
+        )}
+
         <PrimaryAuthButton disabled={isLoading}>
           {isLoading ? "Sending OTP..." : t("r_createAccount")}
         </PrimaryAuthButton>
@@ -112,7 +118,7 @@ export default function RegisterForm() {
 
       <p className="mt-5 text-center text-sm text-[var(--text-muted)]">
         {t("r_noAccount")}{" "}
-        <Link href="/login" className="font-medium text-[var(--accent-green)]">
+        <Link href="/login" className="font-medium text-[var(--accent)]">
           {t("r_login")}
         </Link>
       </p>
@@ -137,9 +143,7 @@ function Field({
 }) {
   return (
     <label className="block">
-      <span className="mb-1.5 block text-sm font-medium text-[var(--text-primary)]">
-        {label}
-      </span>
+      <span className="field-label">{label}</span>
       <span className="relative block">
         <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-muted)]">
           {icon}

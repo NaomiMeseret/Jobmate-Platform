@@ -1,6 +1,16 @@
 import { createApi } from "@reduxjs/toolkit/query/react";
-import { JobCardProps } from "@/app/components/jobSearch/Jobcard";
 import { baseQueryWithReauth } from "./baseQuery";
+
+export interface JobCardProps {
+  id?: string;
+  title?: string;
+  company?: string;
+  location?: string;
+  type?: string;
+  requirements?: string[];
+  link?: string;
+  source?: string;
+}
 
 export const jobApi = createApi({
   reducerPath: "jobApi",

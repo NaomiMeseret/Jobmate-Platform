@@ -8,32 +8,33 @@ import LanguageSelector from "../LanguageSelector";
 
 export function AuthPageShell({ children }: { children: ReactNode }) {
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden px-4 py-10 text-[var(--text-primary)] md:px-8">
-      <div className="absolute left-6 top-6 z-10 flex items-center gap-3 md:left-8 md:top-8">
-        <Link href="/" className="inline-flex items-center gap-2">
-          <AfricaMapSVG className="h-6 w-6 opacity-90" />
-          <span className="font-display text-2xl font-semibold">
-            <span>Job</span>
-            <span className="text-[var(--accent-gold)]">Mate</span>
-          </span>
-        </Link>
+    <main className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)]">
+      <div className="border-b border-[var(--border)]">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 md:px-8">
+          <Link href="/" className="flex items-center gap-2.5">
+            <span className="grid size-8 place-items-center rounded-md bg-[var(--accent)] text-[var(--accent-contrast)]">
+              <AfricaMapSVG className="h-5 w-5" />
+            </span>
+            <span className="text-base font-semibold tracking-tight">
+              JobMate
+            </span>
+          </Link>
+          <div className="flex items-center gap-2">
+            <LanguageSelector />
+            <ThemeToggle />
+          </div>
+        </div>
       </div>
-      <div className="absolute right-6 top-6 z-10 flex items-center gap-2 md:right-8 md:top-8">
-        <LanguageSelector />
-        <ThemeToggle />
+      <div className="flex min-h-[calc(100vh-4rem)] items-center justify-center px-4 py-12">
+        <div className="w-full">{children}</div>
       </div>
-      <AfricaMapSVG className="pointer-events-none absolute -right-16 top-24 h-80 w-80 opacity-10 md:h-[30rem] md:w-[30rem]" />
-      <div className="relative z-10 w-full">{children}</div>
     </main>
   );
 }
 
 export function AuthCard({ children }: { children: ReactNode }) {
   return (
-    <div className="glass-card mx-auto w-full max-w-md p-6 md:p-7">
-      <div className="glass-reflection" />
-      <div className="relative z-10">{children}</div>
-    </div>
+    <div className="card mx-auto w-full max-w-md p-6 md:p-8">{children}</div>
   );
 }
 
@@ -47,14 +48,10 @@ export function AuthHeader({
   description: string;
 }) {
   return (
-    <div className="mb-7">
-      <p className="text-xs font-medium uppercase tracking-[0.08em] text-[var(--accent-gold)]">
-        {eyebrow}
-      </p>
-      <h1 className="mt-2 font-display text-4xl font-semibold leading-tight text-[var(--text-primary)]">
-        {title}
-      </h1>
-      <p className="mt-3 text-base leading-7 text-[var(--text-muted)]">
+    <div className="mb-6">
+      <p className="eyebrow">{eyebrow}</p>
+      <h1 className="mt-2 text-2xl font-semibold tracking-tight">{title}</h1>
+      <p className="mt-1.5 text-sm leading-6 text-[var(--text-muted)]">
         {description}
       </p>
     </div>
@@ -62,11 +59,7 @@ export function AuthHeader({
 }
 
 export function AuthError({ children }: { children: ReactNode }) {
-  return (
-    <p className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm font-medium text-red-400">
-      {children}
-    </p>
-  );
+  return <p className="alert-error">{children}</p>;
 }
 
 export function PrimaryAuthButton({
@@ -80,7 +73,7 @@ export function PrimaryAuthButton({
     <button
       type="submit"
       disabled={disabled}
-      className="h-12 w-full rounded-lg bg-[var(--accent-gold)] px-4 text-base font-medium text-[#080C18] transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60"
+      className="btn-primary h-11 w-full"
     >
       {children}
     </button>
