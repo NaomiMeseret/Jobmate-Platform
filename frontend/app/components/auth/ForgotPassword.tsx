@@ -39,13 +39,13 @@ export default function ForgotPassword({ onClose }: { onClose: () => void }) {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="modern-input"
+          className="input"
         />
         <div className="grid gap-3 sm:grid-cols-2">
           <button
             type="button"
             onClick={onClose}
-            className="h-12 rounded-lg border border-[var(--border)] bg-[var(--bg-surface-hover)] px-4 text-base font-medium text-[var(--text-primary)] transition hover:border-[var(--border-accent)]"
+            className="btn-secondary h-11"
           >
             {t("cancel")}
           </button>
