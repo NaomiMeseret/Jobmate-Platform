@@ -1,8 +1,8 @@
 "use client";
 
-import { Check, Crown, Gift, LockKeyhole } from "lucide-react";
+import { Check, Crown, Gift, ShieldCheck } from "lucide-react";
 import PricingSection from "../components/PricingSection";
-import { AppShell, Surface } from "../components/modern/AppShell";
+import { AppShell, SectionHeader, Surface } from "../components/modern/AppShell";
 import { useLanguage } from "@/providers/language-provider";
 
 const planDetails = {
@@ -72,24 +72,18 @@ function FeatureList({
   variant: "free" | "pro";
 }) {
   const Icon = variant === "free" ? Gift : Crown;
-  const accent = variant === "free" ? "var(--accent-green)" : "var(--accent-gold)";
 
   return (
     <Surface>
-      <div className="mb-5 flex items-center gap-3">
-        <span
-          className="grid size-11 place-items-center rounded-lg border bg-[var(--bg-surface-hover)]"
-          style={{ borderColor: accent, color: accent }}
-        >
-          <Icon className="size-5" />
-        </span>
-        <h2 className="font-display text-2xl font-semibold">{title}</h2>
-      </div>
-      <ul className="space-y-3">
+      <SectionHeader
+        icon={<Icon className="size-4" />}
+        title={title}
+      />
+      <ul className="space-y-2.5">
         {items.map((item) => (
-          <li key={item} className="flex gap-3 text-base leading-7 text-[var(--text-muted)]">
-            <Check className="mt-1 size-4 shrink-0 text-[var(--accent-green)]" />
-            <span>{item}</span>
+          <li key={item} className="flex gap-2.5 text-sm leading-6">
+            <Check className="mt-1 size-4 shrink-0 text-[var(--accent)]" />
+            <span className="text-[var(--text-muted)]">{item}</span>
           </li>
         ))}
       </ul>
@@ -112,12 +106,12 @@ export default function PricingPage() {
         <FeatureList title={copy.proTitle} items={copy.pro} variant="pro" />
       </div>
 
-      <Surface className="mt-5 border-[var(--border-accent)]">
+      <Surface className="mt-5">
         <div className="flex gap-3">
-          <LockKeyhole className="mt-1 size-5 shrink-0 text-[var(--accent-gold)]" />
+          <ShieldCheck className="mt-0.5 size-5 shrink-0 text-[var(--accent)]" />
           <div>
-            <h2 className="font-display text-2xl font-semibold">{copy.noteTitle}</h2>
-            <p className="mt-2 text-base leading-8 text-[var(--text-muted)]">
+            <h2 className="text-base font-semibold">{copy.noteTitle}</h2>
+            <p className="mt-1.5 text-sm leading-6 text-[var(--text-muted)]">
               {copy.note}
             </p>
           </div>
