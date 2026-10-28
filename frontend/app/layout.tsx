@@ -1,5 +1,4 @@
 import type React from "react";
-import Script from "next/script";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import {
@@ -64,12 +63,6 @@ export default function RootLayout({
     >
       <body suppressHydrationWarning>
         <AppProviders>{children}</AppProviders>
-        <Script
-          src="https://faris-asist.getchereta.com/widget/loader.js"
-          strategy="afterInteractive"
-          data-base-url="https://faris-asist.getchereta.com"
-          data-widget-key="wk_g5zgsrezkg95lm1b3bfvjv7wtv36bus0"
-        />
       </body>
     </html>
   );
