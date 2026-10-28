@@ -18,45 +18,59 @@ const companyLinks = [
   { label: { en: "Get Started", am: "ጀምር" }, href: "/register" },
 ];
 
-const socialLinks = [
-  { label: "LinkedIn", href: "/" },
-  { label: "Instagram", href: "/" },
-  { label: "X", href: "/" },
-  { label: "Email", href: "mailto:hello@jobmate.africa" },
-];
-
 export default function Footer() {
   const { language } = useLanguage();
 
   return (
-    <footer className="border-t border-[var(--border-accent)] px-4 py-12 md:px-8">
-      <div className="mx-auto grid max-w-7xl gap-10 md:grid-cols-2 lg:grid-cols-4">
-        <div>
-          <Link href="/" className="inline-flex items-center gap-3">
-            <AfricaMapSVG className="h-8 w-8" />
-            <span className="font-display text-2xl font-semibold">
-              <span className="text-[var(--text-primary)]">Job</span>
-              <span className="text-[var(--accent-gold)]">Mate</span>
-            </span>
-          </Link>
-          <p className="mt-4 max-w-sm text-base leading-8 text-[var(--text-muted)]">
-            {language === "am"
-              ? "በAI የተጎለበተ የሙያ ልማት ለወጣት አፍሪካዊ ተሰጥኦ፣ ለአካባቢያዊ እውነታዎች እና ለዓለም አቀፍ ምኞት የተገነባ።"
-              : "AI-powered career development for young African talent, built for local realities and global ambition."}
-          </p>
+    <footer className="border-t border-[var(--border)] bg-[var(--bg-ink)] px-4 py-14 text-[var(--text-on-ink)] md:px-8">
+      <div className="mx-auto max-w-6xl">
+        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-4">
+          <div className="lg:col-span-2">
+            <Link href="/" className="group inline-flex items-center gap-2.5">
+              <span className="grid size-8 place-items-center border border-[var(--text-on-ink)]/25 transition-colors group-hover:border-[var(--accent)] group-hover:text-[var(--accent)]">
+                <AfricaMapSVG className="h-[18px] w-[18px]" />
+              </span>
+              <span className="flex flex-col leading-none">
+                <span className="display text-[17px] font-semibold tracking-tight">
+                  JobMate
+                </span>
+                <span className="kicker mt-0.5 text-[9px] tracking-[0.2em]">
+                  Career Studio
+                </span>
+              </span>
+            </Link>
+            <p className="mt-5 max-w-sm text-sm leading-6 text-[var(--text-on-ink)]/65">
+              {language === "am"
+                ? "በAI የተጎለበተ የሙያ ልማት ለወጣት አፍሪካዊ ተሰጥኦ፣ ለአካባቢያዊ እውነታዎች እና ለዓለም አቀፍ ምኞት የተገነባ።"
+                : "AI-powered career development for young African talent, built for local realities and global ambition."}
+            </p>
+          </div>
+
+          <FooterColumn
+            title={language === "am" ? "ምርት" : "Product"}
+            links={productLinks}
+            language={language}
+          />
+          <FooterColumn
+            title={language === "am" ? "አገሓኝ" : "Explore"}
+            links={companyLinks}
+            language={language}
+          />
         </div>
 
-        <FooterColumn title={language === "am" ? "ምርት" : "Product"} links={productLinks} language={language} />
-        <FooterColumn title={language === "am" ? "ኩባንያ" : "Company"} links={companyLinks} language={language} />
-        <FooterColumn title={language === "am" ? "ማህበራዊ" : "Social"} links={socialLinks.map((link) => ({ ...link, label: { en: link.label, am: link.label } }))} language={language} />
-      </div>
-
-      <div className="mx-auto mt-10 max-w-7xl border-t border-[var(--border)] pt-6 text-base text-[var(--text-muted)]">
-        <p>
-          {language === "am"
-            ? "© 2025 JobMate. ለአፍሪካ የተገነባ፣ ለዓለም ዝግጁ።"
-            : "© 2025 JobMate. Built for Africa, ready for the world."}
-        </p>
+        <div className="mt-12 flex flex-col gap-2 border-t border-[var(--text-on-ink)]/15 pt-6 font-mono text-[11px] uppercase tracking-[0.14em] text-[var(--text-on-ink)]/55 sm:flex-row sm:items-center sm:justify-between">
+          <p>
+            {language === "am"
+              ? "© 2025 JobMate. ለአፍሪካ የተገነባ፣ ለዓለም ዝግጁ።"
+              : "© 2025 JobMate. Built for Africa, ready for the world."}
+          </p>
+          <a
+            href="mailto:hello@jobmate.africa"
+            className="transition-colors hover:text-[var(--text-on-ink)]"
+          >
+            hello@jobmate.africa
+          </a>
+        </div>
       </div>
     </footer>
   );
@@ -73,15 +87,15 @@ function FooterColumn({
 }) {
   return (
     <div>
-      <h3 className="text-xs font-medium uppercase tracking-[0.08em] text-[var(--accent-gold)]">
+      <h3 className="font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-[var(--text-on-ink)]/50">
         {title}
       </h3>
-      <nav className="mt-4 flex flex-col gap-3">
+      <nav className="mt-5 flex flex-col gap-3">
         {links.map((link) => (
           <Link
             key={link.label.en}
             href={link.href}
-            className="text-base text-[var(--text-muted)] transition hover:text-[var(--text-primary)]"
+            className="text-sm text-[var(--text-on-ink)]/75 transition-colors hover:text-[var(--text-on-ink)]"
           >
             {link.label[language]}
           </Link>
