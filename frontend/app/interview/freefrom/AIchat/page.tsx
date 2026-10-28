@@ -10,7 +10,12 @@ import {
   useGetFreeformHistoryQuery,
   useSendFreeformMessageMutation,
 } from "@/lib/redux/api/interviewApi";
-import { AppShell, EmptyState, Surface } from "@/app/components/modern/AppShell";
+import {
+  AppShell,
+  EmptyState,
+  SectionHeader,
+  Surface,
+} from "@/app/components/modern/AppShell";
 
 type Message = {
   role: string;
@@ -76,53 +81,39 @@ function ChatContent() {
       title="Practice in a conversational room."
       description="Keep the conversation natural, practice your answers, and review the coach's feedback as you go."
       actions={
-        <Link
-          href="/interview/freefrom/History/all"
-          className="inline-flex h-11 items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-black text-slate-700 transition hover:bg-slate-50"
-        >
+        <Link href="/interview/freefrom/History/all" className="btn-secondary">
           <History className="size-4" />
           History
         </Link>
       }
     >
       <Surface className="mx-auto max-w-5xl">
-        <div className="mb-5 flex items-center gap-3">
-          <span className="grid size-11 place-items-center rounded-lg bg-[#e8f3ef] text-[#155e51]">
-            <MessageCircle className="size-5" />
-          </span>
-          <div>
-            <h2 className="text-xl font-black">Interview chat</h2>
-            <p className="text-sm text-slate-500">
-              {chatId || "No chat selected"}
-            </p>
-          </div>
-        </div>
+        <SectionHeader
+          icon={<MessageCircle className="size-4" />}
+          title="Interview chat"
+          description={chatId || "No chat selected"}
+        />
 
         {!chatId ? (
           <EmptyState
             title="No session selected"
             description="Create a new free-form interview session before chatting."
           >
-            <Link
-              href="/interview/freefrom/session"
-              className="inline-flex h-11 items-center rounded-lg bg-[#183d3d] px-5 text-sm font-black text-white"
-            >
+            <Link href="/interview/freefrom/session" className="btn-primary">
               Create session
             </Link>
           </EmptyState>
         ) : (
           <>
-            {error && (
-              <p className="mb-4 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm font-semibold text-red-700">
-                {error}
-              </p>
-            )}
-            <div className="flex h-[540px] flex-col gap-3 overflow-y-auto rounded-lg border border-slate-200 bg-slate-50 p-4">
+            {error && <p className="alert-error mb-4">{error}</p>}
+            <div className="chat-panel h-[540px]">
               {isFetching && (
-                <p className="text-sm text-slate-500">Loading history...</p>
+                <p className="text-sm text-[var(--text-muted)]">
+                  Loading history...
+                </p>
               )}
               {!messages.length && !isFetching && (
-                <p className="text-sm text-slate-500">
+                <p className="text-sm text-[var(--text-muted)]">
                   Start with a short intro and the role you are preparing for.
                 </p>
               )}
@@ -130,9 +121,7 @@ function ChatContent() {
                 <div
                   key={`${message.timestamp || index}-${index}`}
                   className={
-                    message.role === "user"
-                      ? "ml-auto max-w-[84%] rounded-lg bg-[#183d3d] px-4 py-3 text-white"
-                      : "mr-auto max-w-[84%] rounded-lg border border-slate-200 bg-white px-4 py-3 text-slate-700"
+                    message.role === "user" ? "chat-user" : "chat-assistant"
                   }
                 >
                   <div className="markdown-body text-sm">
@@ -149,12 +138,13 @@ function ChatContent() {
                 value={draft}
                 onChange={(event) => setDraft(event.target.value)}
                 placeholder="Answer the interviewer or ask for a new question..."
-                className="modern-input"
+                className="input"
+                aria-label="Send message"
               />
               <button
                 type="submit"
                 disabled={isLoading || !draft.trim()}
-                className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-[#183d3d] text-white transition hover:bg-[#235553] disabled:opacity-60"
+                className="btn-primary size-10 shrink-0 !px-0"
                 aria-label="Send message"
               >
                 {isLoading ? (
@@ -173,7 +163,7 @@ function ChatContent() {
 
 export default function AIchat() {
   return (
-    <Suspense fallback={<div className="p-8 text-slate-600">Loading...</div>}>
+    <Suspense fallback={<div className="p-8 text-[var(--text-muted)]">Loading...</div>}>
       <ChatContent />
     </Suspense>
   );
