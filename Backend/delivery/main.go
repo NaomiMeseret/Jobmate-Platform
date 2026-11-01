@@ -111,7 +111,7 @@ func main() {
 	otpController := controllers.NewOtpController(otpUsecase)
 	authController := controllers.NewAuthController(authUsecase)
 	userController := controllers.NewUserController(userUsecase)
-	oauthController := controllers.NewOAuth2Controller(oauthService, authUsecase)
+	oauthController := controllers.NewOAuth2Controller(oauthService, authUsecase, cfg.FrontendURL)
 	cvController := controllers.NewCVController(cvUsecase)
 	//chatController := controllers.NewChatController(chatUsecase)
 	cvChatController := controllers.NewCVChatController(cvChatUsecase)
