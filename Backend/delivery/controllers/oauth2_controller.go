@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"net/url"
+	"strings"
 
 	svc "github.com/tsigemariamzewdu/JobMate-backend/domain/interfaces/services"
 	uc "github.com/tsigemariamzewdu/JobMate-backend/domain/interfaces/usecases"
@@ -15,12 +16,14 @@ import (
 type OAuth2Controller struct {
 	OAuthService svc.IOAuth2Service
 	AuthUsecase  uc.IAuthUsecase
+	FrontendURL  string
 }
 
-func NewOAuth2Controller(service svc.IOAuth2Service, authUsecase uc.IAuthUsecase) *OAuth2Controller {
+func NewOAuth2Controller(service svc.IOAuth2Service, authUsecase uc.IAuthUsecase, frontendURL string) *OAuth2Controller {
 	return &OAuth2Controller{
 		OAuthService: service,
 		AuthUsecase:  authUsecase,
+		FrontendURL:  strings.TrimRight(frontendURL, "/"),
 	}
 }
 
@@ -90,7 +93,10 @@ func (ctrl *OAuth2Controller) HandleCallback(c *gin.Context) {
 		return
 	}
 
-	frontendURL := "https://jobmate-kappa.vercel.app" //or deployed frontend
+	frontendURL := ctrl.FrontendURL
+	if frontendURL == "" {
+		frontendURL = "http://localhost:3000"
+	}
 	redirectURL := fmt.Sprintf("%s/login?token=%s&user=%s",
 		frontendURL,
 		url.QueryEscape(result.AccessToken),

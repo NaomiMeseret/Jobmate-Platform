@@ -8,6 +8,8 @@ import {
   BookOpen,
   Briefcase,
   CreditCard,
+  ChevronLeft,
+  ChevronRight,
   FileText,
   LayoutDashboard,
   Lightbulb,
@@ -74,6 +76,24 @@ export function AppShell({
   const { t } = useLanguage();
   const user = useSelector((state: RootState) => state.auth.user);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  useEffect(() => {
+    setSidebarCollapsed(
+      window.localStorage.getItem("jobmate-sidebar-collapsed") === "true"
+    );
+  }, []);
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed((collapsed) => {
+      const nextCollapsed = !collapsed;
+      window.localStorage.setItem(
+        "jobmate-sidebar-collapsed",
+        String(nextCollapsed)
+      );
+      return nextCollapsed;
+    });
+  };
 
   // Close the mobile drawer whenever the route changes.
   useEffect(() => {
@@ -92,13 +112,20 @@ export function AppShell({
       )}
 
       <aside
+        id="app-sidebar"
         className={cn(
-          "fixed inset-y-0 left-0 z-40 flex w-[248px] flex-col border-r border-[var(--border)] bg-[var(--bg-surface)] transition-transform duration-300 ease-out lg:translate-x-0",
-          menuOpen ? "translate-x-0" : "-translate-x-full"
+          "fixed inset-y-0 left-0 z-40 flex w-[248px] flex-col border-r border-[var(--border)] bg-[var(--bg-surface)] transition-[width,transform] duration-300 ease-out lg:translate-x-0",
+          menuOpen ? "translate-x-0" : "-translate-x-full",
+          sidebarCollapsed ? "lg:w-[72px]" : "lg:w-[248px]"
         )}
       >
-        <div className="flex h-16 items-center justify-between border-b border-[var(--border)] px-5">
-          <BrandMark />
+        <div
+          className={cn(
+            "flex h-16 items-center justify-between border-b border-[var(--border)] px-5",
+            sidebarCollapsed && "lg:justify-center lg:px-2"
+          )}
+        >
+          <BrandMark compact={sidebarCollapsed} />
           <button
             type="button"
             aria-label="Close sidebar"
@@ -109,7 +136,28 @@ export function AppShell({
           </button>
         </div>
 
-        <div className="border-b border-[var(--border)] px-5 py-3">
+        <button
+          type="button"
+          aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-expanded={!sidebarCollapsed}
+          aria-controls="app-sidebar"
+          title={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          onClick={toggleSidebar}
+          className="absolute -right-3 top-[4.75rem] z-10 hidden size-7 place-items-center border border-[var(--border-strong)] bg-[var(--bg-surface)] text-[var(--text-muted)] shadow-sm transition-colors hover:text-[var(--text-primary)] lg:grid"
+        >
+          {sidebarCollapsed ? (
+            <ChevronRight className="size-4" />
+          ) : (
+            <ChevronLeft className="size-4" />
+          )}
+        </button>
+
+        <div
+          className={cn(
+            "border-b border-[var(--border)] px-5 py-3",
+            sidebarCollapsed && "lg:hidden"
+          )}
+        >
           <p className="kicker">Workspace</p>
         </div>
 
@@ -125,25 +173,31 @@ export function AppShell({
                 href={item.href}
                 className={cn(
                   "group flex items-center gap-3 px-3 py-2.5 text-sm transition-colors",
+                  sidebarCollapsed && "lg:justify-center lg:px-0",
                   active
                     ? "bg-[var(--bg-ink)] font-medium text-[var(--text-on-ink)]"
                     : "text-[var(--text-muted)] hover:bg-[var(--bg-surface-hover)] hover:text-[var(--text-primary)]"
                 )}
                 aria-current={active ? "page" : undefined}
+                title={sidebarCollapsed ? t(item.labelKey) : undefined}
               >
-                <span
-                  className={cn(
-                    "w-4 font-mono text-[10px] tabular-nums",
-                    active
-                      ? "text-[var(--accent)]"
-                      : "text-[var(--border-strong)]"
-                  )}
-                >
-                  {String(index + 1).padStart(2, "0")}
-                </span>
+                {!sidebarCollapsed && (
+                  <span
+                    className={cn(
+                      "w-4 font-mono text-[10px] tabular-nums",
+                      active
+                        ? "text-[var(--accent)]"
+                        : "text-[var(--border-strong)]"
+                    )}
+                  >
+                    {String(index + 1).padStart(2, "0")}
+                  </span>
+                )}
                 <Icon className="size-4 shrink-0" />
-                <span className="flex-1">{t(item.labelKey)}</span>
-                {active && (
+                <span className={cn("flex-1", sidebarCollapsed && "lg:hidden")}>
+                  {t(item.labelKey)}
+                </span>
+                {active && !sidebarCollapsed && (
                   <span className="h-1.5 w-1.5 bg-[var(--accent)]" aria-hidden="true" />
                 )}
               </Link>
@@ -152,11 +206,16 @@ export function AppShell({
         </nav>
 
         <div className="border-t border-[var(--border)] p-4">
-          <div className="flex items-center gap-3">
+          <div
+            className={cn(
+              "flex items-center gap-3",
+              sidebarCollapsed && "lg:flex-col lg:gap-2"
+            )}
+          >
             <span className="grid size-8 shrink-0 place-items-center bg-[var(--accent-subtle)] font-mono text-xs font-semibold text-[var(--accent)]">
               {(user?.firstName || user?.email || "J").charAt(0).toUpperCase()}
             </span>
-            <div className="min-w-0 flex-1">
+            <div className={cn("min-w-0 flex-1", sidebarCollapsed && "lg:hidden")}>
               <p className="truncate text-sm font-medium">
                 {user?.firstName || user?.email || "JobMate user"}
               </p>
@@ -176,7 +235,7 @@ export function AppShell({
         </div>
       </aside>
 
-      <div className="lg:pl-[248px]">
+      <div className={sidebarCollapsed ? "lg:pl-[72px]" : "lg:pl-[248px]"}>
         <header className="sticky top-0 z-20 border-b border-[var(--border)] bg-[var(--bg-base)]/95 backdrop-blur">
           <div className="flex h-16 items-center gap-3 px-4 md:px-8">
             <button

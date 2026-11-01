@@ -155,6 +155,9 @@ BASE_URL=https://your-backend-url.onrender.com
 BACKEND_URL=https://your-backend-url.onrender.com
 FRONTEND_URL=https://your-frontend-url.vercel.app
 ALLOWED_ORIGINS=https://your-frontend-url.vercel.app
+GOOGLE_CLIENT_ID=your-google-oauth-web-client-id
+GOOGLE_CLIENT_SECRET=your-google-oauth-client-secret
+GOOGLE_REDIRECT_URL=/oauth/google/callback
 
 DB_URI=mongodb+srv://...
 DB_NAME=jobmate
